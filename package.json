@@ -4,10 +4,11 @@
     "@types/node-telegram-bot-api": "^0.64.6",
     "dotenv": "^16.4.5",
     "node-telegram-bot-api": "^0.65.1",
+    "nodemon": "^3.1.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
   },
   "scripts": {
-    "dev": "npx ts-node bot.ts"
+    "dev": "npx nodemon --watch bot.ts --exec ts-node bot.ts"
   }
 }
