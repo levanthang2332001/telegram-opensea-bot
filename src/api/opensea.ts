@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { ResponseData, CollectionData }  from '../interface';
+import  { ResponseData, CollectionData } from '../interface/index';
 dotenv.config();
 
 if(!process.env.OPENSEA_API_KEY) {
@@ -12,7 +12,7 @@ const options = {
     headers: {accept: 'application/json', 'x-api-key': process.env.OPENSEA_API_KEY}
 };
 
-const GetCollectionFromAddress = async (address: string, chain: string): Promise<CollectionData> => {
+export const GetCollectionFromAddress = async (address: string, chain: string): Promise<CollectionData> => {
     try {
         const response = await fetch(`https://api.opensea.io/api/v2/chain/${chain}/contract/${address}`, options);
         const data = await response.json();
@@ -23,7 +23,7 @@ const GetCollectionFromAddress = async (address: string, chain: string): Promise
     }
 };
 
-const GetBestListingsByCollection = async (collection: string) => {
+export const GetBestListingsByCollection = async (collection: string) => {
     try {
         const response = await fetch(`https://api.opensea.io/api/v2/listings/collection/${collection}/best?limit=1`, options);
         const data = await response.json();

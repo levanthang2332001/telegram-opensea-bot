@@ -42,12 +42,12 @@ interface Listing {
     protocol_address: string;
 }
 
-export interface ResponseData {
+interface ResponseData {
     listings: Listing[];
     next: string;
 }
 
-export interface CollectionData {
+interface CollectionData {
     address: string;
     chain: string;
     collection: string;
@@ -55,3 +55,12 @@ export interface CollectionData {
     name: string;
     total_supply: number;
 }
+
+interface ChatState {
+    waitingForAddress?: boolean;
+    waitingForCollection?: boolean;
+}
+
+
+
+export type { ResponseData, CollectionData, ChatState};

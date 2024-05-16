@@ -1,5 +1,10 @@
 import TelegramBot, { Message, InlineKeyboardButton, InlineKeyboardMarkup } from 'node-telegram-bot-api';
+import { evmValidation } from './src/validation/evm';
+import { GetCollectionFromAddress } from './src/api/opensea';
+import { ChatState } from './src/interface';
+import { myCommands, opts } from './botCommands';
 import dotenv from 'dotenv';
+
 dotenv.config();
 
 if(!process.env.TELEGRAM_BOT_TOKEN) {
@@ -7,29 +12,16 @@ if(!process.env.TELEGRAM_BOT_TOKEN) {
     process.exit(1);
 }
 
+const chatStates: Record<number, ChatState> = {};
+
+// Create a bot that uses 'polling' to fetch new updates
 const TOKEN: string = process.env.TELEGRAM_BOT_TOKEN || '';
 const bot = new TelegramBot(TOKEN, {polling: true});
 
-interface ChatState {
-    waitingForAddress?: boolean;
-    waitingForCollection?: boolean;
-}
 
-const chatStates: Record<number, ChatState> = {};
-
-const myCommands = [
-    {command: '/start', description: 'Start the bot'},
-    {command: '/help', description: 'Get help'}
-]
-
-const InlineKeyboardButtons: InlineKeyboardButton[][] = [
-    [{text: 'Address', callback_data: '/address'}, {text: 'Collection ', callback_data: '/collection'}],
-];
-
-const opts = {
-    reply_markup: {
-        inline_keyboard: InlineKeyboardButtons
-    }
+const setChatStateAndSendMessage = (chatId: number, message: string, state: ChatState) => {
+    chatStates[chatId] = state;
+    bot.sendMessage(chatId, message);
 };
 
 bot.onText(/\/start/, (msg: Message) => {
@@ -37,30 +29,25 @@ bot.onText(/\/start/, (msg: Message) => {
     bot.sendMessage(chatId, 'Welcome! Choose an option:', opts);
 });
 
-bot.onText(/\/address/, (msg: Message) => {
-    const chatId = msg.chat.id;
-    chatStates[chatId] = {waitingForAddress: true};
-    bot.sendMessage(chatId, 'Enter your address:');
-});
 
-bot.onText(/\/collection/, (msg: Message) => {
-    const chatId = msg.chat.id;
-    chatStates[chatId] = {...chatStates[chatId] ,waitingForCollection: true};
-    bot.sendMessage(chatId, 'Enter your collection');
-});
-
-bot.on('message', (msg: Message) => {
+bot.on('message', async (msg: Message) => {
     const chatId = msg.chat.id;
 
-    if(chatStates[chatId]?.waitingForAddress) {
-        const address = msg.text;
-        chatStates[chatId] = {waitingForAddress: false};
-        bot.sendMessage(chatId, `Your address is: ${address}`);
-    } else if(chatStates[chatId]?.waitingForCollection) {
-        const collection = msg.text;
-        chatStates[chatId] = {waitingForCollection: false};
-        bot.sendMessage(chatId, `Your collection is: ${collection}`);
-    
+    const state = chatStates[chatId];
+    const message: string = msg.text || '';
+
+    if(state?.waitingForAddress) {
+        if(!evmValidation(message)) {
+            bot.sendMessage(chatId, 'Invalid address. Please enter a valid address:');
+            return;
+        }
+        const data = await GetCollectionFromAddress(message, 'ethereum');
+        console.log(data)
+
+        setChatStateAndSendMessage(chatId, `Your address is: ${data}`, {waitingForAddress: false});
+
+    } else if(state?.waitingForCollection) {
+        setChatStateAndSendMessage(chatId, `Your collection is: ${message}`, {waitingForCollection: false});
     }
 }); 
 
@@ -68,13 +55,15 @@ bot.on('callback_query', (query) => {
     const message = query.message;
     const data = query.data;
 
-    console.log(data)
-
     if(data === '/address' && message) {
-        bot.sendMessage(message.chat.id, `You clicked on ${data}`);
-    };
+        const chatId = message.chat.id;
+        setChatStateAndSendMessage(chatId, '📍Enter your address:', {waitingForAddress: true})
+    };  
 
+    if(data === '/collection' && message) {
+        const chatId = message.chat.id;
+        setChatStateAndSendMessage(chatId, '📕Enter your collection:', {waitingForCollection: true})
+    }
 });
-
 
 bot.setMyCommands(myCommands);
