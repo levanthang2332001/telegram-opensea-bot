@@ -1,8 +1,8 @@
-import TelegramBot, { Message, InlineKeyboardButton, InlineKeyboardMarkup } from 'node-telegram-bot-api';
-import { evmValidation } from './src/validation/evm';
-import { GetCollectionFromAddress } from './src/api/opensea';
+import TelegramBot, { Message } from 'node-telegram-bot-api';
+import { isEvmValidation } from './src/validation/evm';
+import { GetCollectionFromAddress, GetBestListingsByCollection } from './src/api/opensea';
 import { ChatState } from './src/interface';
-import { myCommands, opts } from './botCommands';
+import { myCommands, opts, optsChain, chain, Chain } from './botCommands';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -18,51 +18,96 @@ const chatStates: Record<number, ChatState> = {};
 const TOKEN: string = process.env.TELEGRAM_BOT_TOKEN || '';
 const bot = new TelegramBot(TOKEN, {polling: true});
 
+// Default chain: Ethereum
+let chains: Chain = '/ethereum';
 
-const setChatStateAndSendMessage = (chatId: number, message: string, state: ChatState) => {
+const setChatStateAndSendMessage = (chatId: number, message: string, state: ChatState, chain: Chain) => {
     chatStates[chatId] = state;
     bot.sendMessage(chatId, message);
 };
 
+const getDataCollection = async (chatId: number, nft: string, state: ChatState, chain: Chain) => {
+    chatStates[chatId] = state;
+    try {
+        const bestListings = await GetBestListingsByCollection(nft);
+        console.log(bestListings)
+        bot.sendMessage(chatId, `Collection: ${bestListings.listings[0].price.current.value}`);
+    } catch (error) {
+        bot.sendMessage(chatId, `Error: ${error}`);
+    }
+};
+
+const convertToEth = (price: number) => {
+    return price / Math.pow(10, 18);
+}
+
+const getDataAddress = async (chatId: number, address: string, state: ChatState , chain: Chain) => {
+    chatStates[chatId] = state;
+
+    try {
+        const nft = await GetCollectionFromAddress(address, chain);
+
+        if (!nft.collection) {
+            bot.sendMessage(chatId, `No collection found for this address: ${address}`);
+            return;
+        }
+        
+        const collection = await GetBestListingsByCollection(nft.collection);
+        if (!collection.listings || collection.listings.length === 0) {
+            bot.sendMessage(chatId, `No listings found for this collection: ${nft.collection}`);
+            return;
+        }
+        
+        const price = convertToEth(Number(collection.listings[0].price.current.value)) + collection.listings[0].price.current.currency;
+        bot.sendMessage(chatId, `Floor now : ${price}`);
+
+    } catch (error) {
+        console.error(`Error getting data for address ${address}:`, error);
+        bot.sendMessage(chatId, `Error: ${error}`);
+    }
+};
+
+
 bot.onText(/\/start/, (msg: Message) => {
     const chatId = msg.chat.id;
-    bot.sendMessage(chatId, 'Welcome! Choose an option:', opts);
+    bot.sendMessage(chatId, 'Welcome! Choose an option:', optsChain);
 });
 
 
-bot.on('message', async (msg: Message) => {
+bot.on('message', (msg: Message) => {
     const chatId = msg.chat.id;
-
     const state = chatStates[chatId];
     const message: string = msg.text || '';
 
-    if(state?.waitingForAddress) {
-        if(!evmValidation(message)) {
-            bot.sendMessage(chatId, 'Invalid address. Please enter a valid address:');
-            return;
-        }
-        const data = await GetCollectionFromAddress(message, 'ethereum');
-        console.log(data)
-
-        setChatStateAndSendMessage(chatId, `Your address is: ${data}`, {waitingForAddress: false});
-
-    } else if(state?.waitingForCollection) {
-        setChatStateAndSendMessage(chatId, `Your collection is: ${message}`, {waitingForCollection: false});
-    }
-}); 
+    state?.waitingForAddress 
+        ? (!isEvmValidation(message) 
+            ? bot.sendMessage(chatId, 'Invalid address. Please enter a valid address:') 
+            : getDataAddress(chatId, message, {waitingForAddress: false}, chains))
+        : state?.waitingForCollection 
+            && getDataCollection(chatId, message, {waitingForCollection: false}, chains);
+});
 
 bot.on('callback_query', (query) => {
-    const message = query.message;
-    const data = query.data;
+    const { message, data } = query;
+    
+    const isChains = chain.includes(data as string);
 
-    if(data === '/address' && message) {
+    if(message && message.chat.id) {
         const chatId = message.chat.id;
-        setChatStateAndSendMessage(chatId, '📍Enter your address:', {waitingForAddress: true})
-    };  
 
-    if(data === '/collection' && message) {
-        const chatId = message.chat.id;
-        setChatStateAndSendMessage(chatId, '📕Enter your collection:', {waitingForCollection: true})
+        if(isChains) {  
+            chains = data as Chain;
+            bot.sendMessage(chatId, 'You clicked on Option Chain. Now choose an option:', opts)
+        }
+        
+        switch (data) {
+            case '/address':
+                setChatStateAndSendMessage(chatId, '📍Enter your address:', {waitingForAddress: true}, chains);
+                break;
+            case '/collection':
+                setChatStateAndSendMessage(chatId, '📕Enter your collection:', {waitingForCollection: true}, chains);
+                break;
+        }
     }
 });
 
