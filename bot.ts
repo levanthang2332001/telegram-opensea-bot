@@ -48,18 +48,18 @@ const getDataAddress = async (chatId: number, address: string, state: ChatState 
         const nft = await GetCollectionFromAddress(address, chain);
 
         if (!nft.collection) {
-            bot.sendMessage(chatId, `No collection found for this address: ${address}`);
+            bot.sendMessage(chatId, `No collection found for this address: ${address}`, opts);
             return;
         }
         
         const collection = await GetBestListingsByCollection(nft.collection);
         if (!collection.listings || collection.listings.length === 0) {
-            bot.sendMessage(chatId, `No listings found for this collection: ${nft.collection}`);
+            bot.sendMessage(chatId, `No listings found for this collection: ${nft.collection}`, opts);
             return;
         }
         
         const price = convertToEth(Number(collection.listings[0].price.current.value)) + collection.listings[0].price.current.currency;
-        bot.sendMessage(chatId, `Floor now : ${price}`);
+        bot.sendMessage(chatId, `Floor now : ${price}`, optsChain);
 
     } catch (error) {
         console.error(`Error getting data for address ${address}:`, error);
@@ -71,6 +71,7 @@ const getDataAddress = async (chatId: number, address: string, state: ChatState 
 bot.onText(/\/start/, (msg: Message) => {
     const chatId = msg.chat.id;
     bot.sendMessage(chatId, 'Welcome! Choose an option:', optsChain);
+    return;
 });
 
 
@@ -79,7 +80,7 @@ bot.on('message', (msg: Message) => {
     const state = chatStates[chatId];
     const message: string = msg.text || '';
 
-    state?.waitingForAddress 
+    state?.waitingForAddress && message 
         ? (!isEvmValidation(message) 
             ? bot.sendMessage(chatId, 'Invalid address. Please enter a valid address:') 
             : getDataAddress(chatId, message, {waitingForAddress: false}, chains))
@@ -97,7 +98,7 @@ bot.on('callback_query', (query) => {
 
         if(isChains) {  
             chains = data as Chain;
-            bot.sendMessage(chatId, 'You clicked on Option Chain. Now choose an option:', opts)
+            bot.sendMessage(chatId, `You clicked on ${chains} Chain. Now choose an option:`, opts)
         }
         
         switch (data) {
