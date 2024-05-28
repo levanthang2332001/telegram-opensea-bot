@@ -18,6 +18,8 @@ const chatStates: Record<number, ChatState> = {};
 const TOKEN: string = process.env.TELEGRAM_BOT_TOKEN || '';
 const bot = new TelegramBot(TOKEN, {polling: true});
 
+let messageToDelete: number | undefined;
+
 // Default chain: Ethereum
 let chains: Chain = '/ethereum';
 
@@ -68,29 +70,57 @@ const getDataAddress = async (chatId: number, address: string, state: ChatState 
 };
 
 
-bot.onText(/\/start/, (msg: Message) => {
+bot.onText(/\/start/, async (msg: Message) => {
     const chatId = msg.chat.id;
     bot.sendMessage(chatId, 'Welcome! Choose an option:', optsChain);
-    return;
-});
 
+    console.log('chatId2', chatId);
+    
+});
 
 bot.on('message', (msg: Message) => {
     const chatId = msg.chat.id;
     const state = chatStates[chatId];
     const message: string = msg.text || '';
 
-    state?.waitingForAddress && message 
-        ? (!isEvmValidation(message) 
-            ? bot.sendMessage(chatId, 'Invalid address. Please enter a valid address:') 
-            : getDataAddress(chatId, message, {waitingForAddress: false}, chains))
-        : state?.waitingForCollection 
-            && getDataCollection(chatId, message, {waitingForCollection: false}, chains);
+    if(state?.waitingForAddress && message) {
+        if(!isEvmValidation(message)) {
+            bot.sendMessage(chatId, 'Invalid address. Please enter a valid address:');
+        } else {
+            getDataAddress(chatId, message, {waitingForAddress: false}, chains);
+        }
+    } else if(state?.waitingForCollection && message) {
+        getDataCollection(chatId, message, {waitingForCollection: false}, chains);
+    }
+
 });
+
+
+// bot.on('message', (msg: Message) => {
+//     const chatId = msg.chat.id;
+//     const state = chatStates[chatId];
+//     const message: string = msg.text || '';
+
+//     if(messageToDelete) {
+//         bot.deleteMessage(chatId, messageToDelete);
+//     }
+
+//     state?.waitingForAddress && message 
+//         ? (!isEvmValidation(message) 
+//             ? bot.sendMessage(chatId, 'Invalid address. Please enter a valid address:') 
+//             : getDataAddress(chatId, message, {waitingForAddress: false}, chains))
+//         : state?.waitingForCollection 
+//             && getDataCollection(chatId, message, {waitingForCollection: false}, chains);
+
+//     messageToDelete = msg.message_id;
+// });
 
 bot.on('callback_query', (query) => {
     const { message, data } = query;
     
+    console.log('query', query);
+    
+
     const isChains = chain.includes(data as string);
 
     if(message && message.chat.id) {
