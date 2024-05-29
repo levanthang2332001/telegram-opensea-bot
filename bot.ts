@@ -24,6 +24,7 @@ let messageToDelete: number | undefined;
 let chains: Chain = '/ethereum';
 
 const setChatStateAndSendMessage = (chatId: number, message: string, state: ChatState, chain: Chain) => {
+
     chatStates[chatId] = state;
     bot.sendMessage(chatId, message);
 };
@@ -73,8 +74,6 @@ const getDataAddress = async (chatId: number, address: string, state: ChatState 
 bot.onText(/\/start/, async (msg: Message) => {
     const chatId = msg.chat.id;
     bot.sendMessage(chatId, 'Welcome! Choose an option:', optsChain);
-
-    console.log('chatId2', chatId);
     
 });
 
@@ -95,31 +94,8 @@ bot.on('message', (msg: Message) => {
 
 });
 
-
-// bot.on('message', (msg: Message) => {
-//     const chatId = msg.chat.id;
-//     const state = chatStates[chatId];
-//     const message: string = msg.text || '';
-
-//     if(messageToDelete) {
-//         bot.deleteMessage(chatId, messageToDelete);
-//     }
-
-//     state?.waitingForAddress && message 
-//         ? (!isEvmValidation(message) 
-//             ? bot.sendMessage(chatId, 'Invalid address. Please enter a valid address:') 
-//             : getDataAddress(chatId, message, {waitingForAddress: false}, chains))
-//         : state?.waitingForCollection 
-//             && getDataCollection(chatId, message, {waitingForCollection: false}, chains);
-
-//     messageToDelete = msg.message_id;
-// });
-
 bot.on('callback_query', (query) => {
     const { message, data } = query;
-    
-    console.log('query', query);
-    
 
     const isChains = chain.includes(data as string);
 
@@ -128,18 +104,26 @@ bot.on('callback_query', (query) => {
 
         if(isChains) {  
             chains = data as Chain;
+            messageToDelete = message.message_id;
             bot.sendMessage(chatId, `You clicked on ${chains} Chain. Now choose an option:`, opts)
         }
         
         switch (data) {
             case '/address':
+                messageToDelete = message.message_id;
                 setChatStateAndSendMessage(chatId, '📍Enter your address:', {waitingForAddress: true}, chains);
                 break;
             case '/collection':
+                messageToDelete = message.message_id;
                 setChatStateAndSendMessage(chatId, '📕Enter your collection:', {waitingForCollection: true}, chains);
                 break;
         }
     }
+
+    if(messageToDelete) {
+        bot.deleteMessage(message?.chat.id || 0, messageToDelete);
+    }
+
 });
 
 bot.setMyCommands(myCommands);
