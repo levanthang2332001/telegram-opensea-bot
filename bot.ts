@@ -3,6 +3,7 @@ import { isEvmValidation } from './src/validation/evm';
 import { GetCollectionFromAddress, GetBestListingsByCollection } from './src/api/opensea';
 import { ChatState } from './src/interface';
 import { myCommands, opts, optsChain, chain, Chain } from './botCommands';
+import mongoose from './src/libs/mongoose';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -29,21 +30,40 @@ const setChatStateAndSendMessage = (chatId: number, message: string, state: Chat
     bot.sendMessage(chatId, message);
 };
 
-const getDataCollection = async (chatId: number, nft: string, state: ChatState, chain: Chain) => {
-    chatStates[chatId] = state;
-    try {
-        const bestListings = await GetBestListingsByCollection(nft);
-        console.log(bestListings)
-        bot.sendMessage(chatId, `Collection: ${bestListings.listings[0].price.current.value}`);
-    } catch (error) {
-        bot.sendMessage(chatId, `Error: ${error}`);
-    }
-};
 
 const convertToEth = (price: number) => {
     return price / Math.pow(10, 18);
 }
 
+/**
+ * Get data nft for collection
+ *
+ * @param {number} chatId
+ * @param {string} nft
+ * @param {ChatState} state
+ * @param {Chain} chain
+ */
+const getDataCollection = async (chatId: number, nft: string, state: ChatState, chain: Chain) => {
+    chatStates[chatId] = state;
+    try {
+        const bestListings = await GetBestListingsByCollection(nft);
+        console.log(bestListings)
+        const price = convertToEth(Number(bestListings.listings[0].price.current.value)) + bestListings.listings[0].price.current.currency;
+        bot.sendMessage(chatId, `Collection: ${price}`);
+    } catch (error) {
+        bot.sendMessage(chatId, `Error: ${error}`);
+    }
+};
+
+/**
+ * Get data nft for address
+ *
+ * @param {number} chatId
+ * @param {string} address
+ * @param {ChatState} state
+ * @param {Chain} chain
+ * @return {*} 
+ */
 const getDataAddress = async (chatId: number, address: string, state: ChatState , chain: Chain) => {
     chatStates[chatId] = state;
 
@@ -72,6 +92,9 @@ const getDataAddress = async (chatId: number, address: string, state: ChatState 
 
 
 bot.onText(/\/start/, async (msg: Message) => {
+    // const data = await mongoose.connect();
+    // console.log(data.connection.readyState)
+
     const chatId = msg.chat.id;
     bot.sendMessage(chatId, 'Welcome! Choose an option:', optsChain);
     
@@ -127,3 +150,4 @@ bot.on('callback_query', (query) => {
 });
 
 bot.setMyCommands(myCommands);
+
