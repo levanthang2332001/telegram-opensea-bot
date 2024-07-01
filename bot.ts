@@ -1,9 +1,10 @@
-import TelegramBot, { Message } from 'node-telegram-bot-api';
+import TelegramBot, { InlineKeyboardButton, Message } from 'node-telegram-bot-api';
 import { isEvmValidation } from './src/validation/evm';
 import { GetCollectionFromAddress, GetBestListingsByCollection } from './src/api/opensea';
-import { ChatState } from './src/interface';
+import { ChatState, CallbackQuery } from './src/interface';
 import { myCommands, opts, optsChain, chain, Chain } from './botCommands';
 import mongoose from './src/libs/mongoose';
+
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -90,13 +91,88 @@ const getDataAddress = async (chatId: number, address: string, state: ChatState 
     }
 };
 
+const buttons = [
+    {
+        text: 'Button 1',
+        callback_data: 'button1_data',
+    },
+    {
+        text: 'Button 2',
+        callback_data: 'button2_data',
+    },
+]
+
+interface ButtonStates {
+    [key: string]: string;
+  }
+const buttonStates: ButtonStates = {}; 
+
+const demo: InlineKeyboardButton[][] = [
+    [
+        { text: 'Button 1-1', callback_data: 'button1_1_data' },
+        { text: 'Button 1-2', callback_data: 'button1_2_data' },
+    ],
+]
+
+const demo2: InlineKeyboardButton[][] = [
+    [
+        { text: 'Button 1-1', callback_data: 'button1_1_data' },
+        { text: 'Button 1-2', callback_data: 'button1_2_data' },
+    ],
+]
+
+const keyboard = {
+    inline_keyboard: [buttons],
+  };
+
+const handleCallbackQuery = (query: CallbackQuery | any) => {
+    console.log('query: ',query)
+
+    const  data  = query.data;
+    const chatId = query.message.chat.id;
+    const messageId = query.message.message_id;
+
+    const currentButtonState = buttonStates[data] || 'initial';
+    console.log('currentButtonState: ',currentButtonState);
+    
+
+    switch(currentButtonState) {
+        case 'initial':
+            if(data === 'button1_data') {
+                console.log('data: ',data);
+                
+                const newKeyboard1 = {
+                    inline_keyboard: demo
+                  };
+                // buttonStates[data] = 'level1'; // Update state for Button 1
+                bot.editMessageReplyMarkup(newKeyboard1, { chat_id: chatId, message_id: messageId });
+            } else if(data === 'button2_data') {
+                const newKeyboard2 = {
+                    inline_keyboard: demo2
+                  };
+                buttonStates[data] = 'level2'; // Update state for Button 2
+                bot.editMessageReplyMarkup(newKeyboard2, messageId);
+            
+            }
+            break;
+    }
+    bot.answerCallbackQuery(query.callback_query.id);
+    
+}
+
+
 
 bot.onText(/\/start/, async (msg: Message) => {
     // const data = await mongoose.connect();
     // console.log(data.connection.readyState)
 
     const chatId = msg.chat.id;
-    bot.sendMessage(chatId, 'Welcome! Choose an option:', optsChain);
+    bot.sendMessage(chatId, 'Welcome! Choose an option:', { reply_markup: keyboard})
+        .then((message) => {
+            console.log('message: ',message);
+            
+           bot.on('callback_query', handleCallbackQuery);
+        });
     
 });
 

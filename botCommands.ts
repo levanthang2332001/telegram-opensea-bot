@@ -42,10 +42,9 @@ const optsChoose = {
         inline_keyboard: InlineKeyboardButtonChoose
     }
 };
-}
 
 export type Chain = '/ethereum' | '/matic' | '/bsc' | '/fantom' | '/arbitrum' | '/avalanche' | '/optimism';
 const chain = ['/ethereum', '/matic', '/bsc', '/fantom', '/arbitrum', '/avalanche', '/optimism'] ;
 
-export { myCommands, opts, optsChain, chain};
+export { myCommands, opts, optsChain, chain,optsChoose};
 
