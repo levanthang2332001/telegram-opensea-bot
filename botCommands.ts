@@ -8,7 +8,7 @@ const myCommands = [
 
 // Inline Keyboard
 const InlineKeyboardButtons: InlineKeyboardButton[][] = [
-    [{text: 'Address', callback_data: '/address'}, {text: 'Collection ', callback_data: '/collection'},{text: 'Help ', callback_data: '/help'}],
+    [{text: 'Token Contract ', callback_data: '/token'}, {text: 'Collection NFT ', callback_data: '/collection'},{text: 'Help ', callback_data: '/help'}],
 ];
 
 const InlineKeyboardButtonChains: InlineKeyboardButton[][] = [
@@ -17,34 +17,31 @@ const InlineKeyboardButtonChains: InlineKeyboardButton[][] = [
 ];
 
 const InlineKeyboardButtonChoose: InlineKeyboardButton[][] = [
-    [{text: 'Choose network', callback_data: '/network'}],
-    [{text: 'My notification', callback_data: '/notification'}]
+    [{text: 'Select a network', callback_data: '/selectChain'}],
+    [{text: 'My notification', callback_data: '/notifications'}]
 ]
 
-const opts = {
-    description: 'Choose address or collection',
-    reply_markup: {
-        inline_keyboard: InlineKeyboardButtons
-    }
-};
+const selectButtons = [
+    {
+        text: 'Select a network',
+        callback_data: 'button1',
+    },
+    {
+        text: 'My notification',
+        callback_data: '/notifications',
+    },
+]
 
-const optsChain = {
-    description: 'Choose chain',
-    reply_markup: {
-        inline_keyboard: InlineKeyboardButtonChains
-    }
-
-};
-
-const optsChoose = {
-    description: 'Choose',
-    reply_markup: {
-        inline_keyboard: InlineKeyboardButtonChoose
-    }
-};
 
 export type Chain = '/ethereum' | '/matic' | '/bsc' | '/fantom' | '/arbitrum' | '/avalanche' | '/optimism';
 const chain = ['/ethereum', '/matic', '/bsc', '/fantom', '/arbitrum', '/avalanche', '/optimism'] ;
 
-export { myCommands, opts, optsChain, chain,optsChoose};
+export { 
+    myCommands,
+    chain,
+    selectButtons,
+    InlineKeyboardButtons,
+    InlineKeyboardButtonChains,
+    InlineKeyboardButtonChoose
+};
 

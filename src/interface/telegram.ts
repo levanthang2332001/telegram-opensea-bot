@@ -1,4 +1,4 @@
-interface CallbackQuery {
+interface CallbackQueryData {
     id: string;
     from: User;
     message: Message;
@@ -45,4 +45,4 @@ interface InlineKeyboardButton {
     // Add other fields as necessary
 }
 
-export type { CallbackQuery }
+export type { CallbackQueryData }

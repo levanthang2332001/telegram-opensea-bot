@@ -1,11 +1,14 @@
-import TelegramBot, { InlineKeyboardButton, Message } from 'node-telegram-bot-api';
+import TelegramBot, { CallbackQuery, Message } from 'node-telegram-bot-api';
+
 import { isEvmValidation } from './src/validation/evm';
 import { GetCollectionFromAddress, GetBestListingsByCollection } from './src/api/opensea';
-import { ChatState, CallbackQuery } from './src/interface';
-import { myCommands, opts, optsChain, chain, Chain } from './botCommands';
+import { ChatState, CallbackQueryData } from './src/interface';
+import { myCommands, chain, Chain, InlineKeyboardButtons, selectButtons } from './botCommands';
 import mongoose from './src/libs/mongoose';
 
 import dotenv from 'dotenv';
+import { createInlineKeyboardOptions } from './src/components/buttons/InlineKeyboardButtons';
+import { inlineKeyboard } from 'telegraf/markup';
 
 dotenv.config();
 
@@ -18,212 +21,224 @@ const chatStates: Record<number, ChatState> = {};
 
 // Create a bot that uses 'polling' to fetch new updates
 const TOKEN: string = process.env.TELEGRAM_BOT_TOKEN || '';
-const bot = new TelegramBot(TOKEN, {polling: true});
+const bot = new Telegraf(TOKEN);
 
 let messageToDelete: number | undefined;
 
 // Default chain: Ethereum
 let chains: Chain = '/ethereum';
 
-const setChatStateAndSendMessage = (chatId: number, message: string, state: ChatState, chain: Chain) => {
-
-    chatStates[chatId] = state;
-    bot.sendMessage(chatId, message);
-};
+bot.start((ctx) => ctx.reply('Welcome! Get started by opensea notification bot'), {
+    reply_markup: inlineKeyboard(selectButtons)
+});
 
 
-const convertToEth = (price: number) => {
-    return price / Math.pow(10, 18);
-}
+bot.launch().then(() => {
+    console.log("Bot launched");
+});
+  
+process.on("SIGTERM", () => {
+    bot.stop();
+});
 
-/**
- * Get data nft for collection
- *
- * @param {number} chatId
- * @param {string} nft
- * @param {ChatState} state
- * @param {Chain} chain
- */
-const getDataCollection = async (chatId: number, nft: string, state: ChatState, chain: Chain) => {
-    chatStates[chatId] = state;
-    try {
-        const bestListings = await GetBestListingsByCollection(nft);
-        console.log(bestListings)
-        const price = convertToEth(Number(bestListings.listings[0].price.current.value)) + bestListings.listings[0].price.current.currency;
-        bot.sendMessage(chatId, `Collection: ${price}`);
-    } catch (error) {
-        bot.sendMessage(chatId, `Error: ${error}`);
-    }
-};
+// const setChatStateAndSendMessage = (chatId: number, message: string, state: ChatState, chain: Chain) => {
 
-/**
- * Get data nft for address
- *
- * @param {number} chatId
- * @param {string} address
- * @param {ChatState} state
- * @param {Chain} chain
- * @return {*} 
- */
-const getDataAddress = async (chatId: number, address: string, state: ChatState , chain: Chain) => {
-    chatStates[chatId] = state;
+//     chatStates[chatId] = state;
+//     bot.sendMessage(chatId, message);
+// };
 
-    try {
-        const nft = await GetCollectionFromAddress(address, chain);
 
-        if (!nft.collection) {
-            bot.sendMessage(chatId, `No collection found for this address: ${address}`, opts);
-            return;
-        }
+// const convertToEth = (price: number) => {
+//     return price / Math.pow(10, 18);
+// }
+
+// /**
+//  * Get data nft for collection
+//  *
+//  * @param {number} chatId
+//  * @param {string} nft
+//  * @param {ChatState} state
+//  * @param {Chain} chain
+//  */
+// const getDataCollection = async (chatId: number, nft: string, state: ChatState, chain: Chain) => {
+//     chatStates[chatId] = state;
+//     try {
+//         const bestListings = await GetBestListingsByCollection(nft);
+//         console.log(bestListings)
+//         const price = convertToEth(Number(bestListings.listings[0].price.current.value)) + bestListings.listings[0].price.current.currency;
+//         bot.sendMessage(chatId, `Collection: ${price}`);
+//     } catch (error) {
+//         bot.sendMessage(chatId, `Error: ${error}`);
+//     }
+// };
+
+// /**
+//  * Get data nft for address
+//  *
+//  * @param {number} chatId
+//  * @param {string} address
+//  * @param {ChatState} state
+//  * @param {Chain} chain
+//  * @return {*} 
+//  */
+// const getDataAddress = async (chatId: number, address: string, state: ChatState , chain: Chain) => {
+//     chatStates[chatId] = state;
+
+//     try {
+//         const nft = await GetCollectionFromAddress(address, chain);
+
+//         if (!nft.collection) {
+//             bot.sendMessage(chatId, `No collection found for this address: ${address}`, createInlineKeyboardOptions(InlineKeyboardButtons));
+//             return;
+//         }
         
-        const collection = await GetBestListingsByCollection(nft.collection);
-        if (!collection.listings || collection.listings.length === 0) {
-            bot.sendMessage(chatId, `No listings found for this collection: ${nft.collection}`, opts);
-            return;
-        }
+//         const collection = await GetBestListingsByCollection(nft.collection);
+//         if (!collection.listings || collection.listings.length === 0) {
+//             bot.sendMessage(chatId, `No listings found for this collection: ${nft.collection}`, createInlineKeyboardOptions(InlineKeyboardButtons));
+//             return;
+//         }
         
-        const price = convertToEth(Number(collection.listings[0].price.current.value)) + collection.listings[0].price.current.currency;
-        bot.sendMessage(chatId, `Floor now : ${price}`, optsChain);
+//         const price = convertToEth(Number(collection.listings[0].price.current.value)) + collection.listings[0].price.current.currency;
+//         bot.sendMessage(chatId, `Floor now : ${price}`, createInlineKeyboardOptions(InlineKeyboardButtonChains));
 
-    } catch (error) {
-        console.error(`Error getting data for address ${address}:`, error);
-        bot.sendMessage(chatId, `Error: ${error}`);
-    }
-};
+//     } catch (error) {
+//         console.error(`Error getting data for address ${address}:`, error);
+//         bot.sendMessage(chatId, `Error: ${error}`);
+//     }
+// };
 
-const buttons = [
-    {
-        text: 'Button 1',
-        callback_data: 'button1_data',
-    },
-    {
-        text: 'Button 2',
-        callback_data: 'button2_data',
-    },
-]
+// interface ButtonStates {
+//     [key: string]: string;
+// }
+// const buttonStates: ButtonStates = {}; 
 
-interface ButtonStates {
-    [key: string]: string;
-  }
-const buttonStates: ButtonStates = {}; 
 
-const demo: InlineKeyboardButton[][] = [
-    [
-        { text: 'Button 1-1', callback_data: 'button1_1_data' },
-        { text: 'Button 1-2', callback_data: 'button1_2_data' },
-    ],
-]
 
-const demo2: InlineKeyboardButton[][] = [
-    [
-        { text: 'Button 1-1', callback_data: 'button1_1_data' },
-        { text: 'Button 1-2', callback_data: 'button1_2_data' },
-    ],
-]
 
-const keyboard = {
-    inline_keyboard: [buttons],
-  };
+// const keyboard = {
+//     inline_keyboard: [selectButtons],
+// };
 
-const handleCallbackQuery = (query: CallbackQuery | any) => {
-    console.log('query: ',query)
 
-    const  data  = query.data;
-    const chatId = query.message.chat.id;
-    const messageId = query.message.message_id;
+// const InlineKeyboardButtonChains = [
+//     [{ text: 'Button 1', callback_data: 'button1' }],
+//     [{ text: 'Button 2', callback_data: 'button2' }],
+//     [{ text: 'Button 3', callback_data: 'button3' }],
+//     [{ text: 'Button 4', callback_data: 'button4' }],
+//     [{ text: 'Button 5', callback_data: 'button5' }]
+// ];
 
-    const currentButtonState = buttonStates[data] || 'initial';
-    console.log('currentButtonState: ',currentButtonState);
-    
+// bot.on('callback_query', async (query: CallbackQuery) => {
+//     const chatId = query.message?.chat.id;
+//     const messageId = query.message?.message_id;
+//     const data = query.data;
 
-    switch(currentButtonState) {
-        case 'initial':
-            if(data === 'button1_data') {
-                console.log('data: ',data);
-                
-                const newKeyboard1 = {
-                    inline_keyboard: demo
-                  };
-                // buttonStates[data] = 'level1'; // Update state for Button 1
-                bot.editMessageReplyMarkup(newKeyboard1, { chat_id: chatId, message_id: messageId });
-            } else if(data === 'button2_data') {
-                const newKeyboard2 = {
-                    inline_keyboard: demo2
-                  };
-                buttonStates[data] = 'level2'; // Update state for Button 2
-                bot.editMessageReplyMarkup(newKeyboard2, messageId);
+//     console.log(messageId);
+//     console.log(data);
+
+//     if (!chatId || !messageId || !data) return;
+
+//     switch (data) {
+//         case 'button1':
+//             await handleButton(chatId, messageId, 'Button 1 clicked!');
+//             break;
+//         case 'button2':
+//             await handleButton(chatId, messageId, 'Button 2 clicked!');
+//             break;
+//         case 'button3':
+//             await handleButton(chatId, messageId, 'Button 3 clicked!');
+//             break;
+//         case 'button4':
+//             await handleButton(chatId, messageId, 'Button 4 clicked!');
+//             break;
+//         case 'button5':
+//             await handleButton(chatId, messageId, 'Button 5 clicked!');
+//             break;
+//         default:
+//             break;
+//     }
+// });
+
+// async function handleButton(chatId: number, messageId: number, newText: string) {
+//     try {
+//         await bot.editMessageText(newText, {
+//             chat_id: chatId,
+//             message_id: messageId,
+//             reply_markup: {
+//                 inline_keyboard: [
+//                     [{ text: 'Button 1', callback_data: 'button1' }],
+//                     [{ text: 'Button 2', callback_data: 'button2' }],
+//                     [{ text: 'Button 3', callback_data: 'button3' }],
+//                     [{ text: 'Button 4', callback_data: 'button4' }],
+//                     [{ text: 'Button 5', callback_data: 'button5' }]
+//                 ]
+//             }
+//         });
+//     } catch (error) {
+//         console.error('Error editing message text:', error);
+//     }
+// }
+
+// bot.onText(/\/start/, async (msg: Message) => {
+//     // const data = await mongoose.connect();
+//     // console.log(data.connection.readyState)
+
+//     const chatId = msg.chat.id;
+//     bot.sendMessage(chatId, 'Welcome! Get started by opensea notification bot', { reply_markup: keyboard})
+//         .then((message) => {
+//             console.log('message: ',message);
             
-            }
-            break;
-    }
-    bot.answerCallbackQuery(query.callback_query.id);
+//         });
     
-}
+// });
 
+// const inputMessage = (msg: Message) => {
+//     const chatId = msg.chat.id;
+//     const state = chatStates[chatId];
+//     const message: string = msg.text || '';
 
+//     if(state?.waitingForAddress && message) {
+//         if(!isEvmValidation(message)) {
+//             bot.sendMessage(chatId, 'Invalid address. Please enter a valid address:');
+//         } else {
+//             getDataAddress(chatId, message, {waitingForAddress: false}, chains);
+//         }
+//     } else if(state?.waitingForCollection && message) {
+//         getDataCollection(chatId, message, {waitingForCollection: false}, chains);
+//     }
+// }
 
-bot.onText(/\/start/, async (msg: Message) => {
-    // const data = await mongoose.connect();
-    // console.log(data.connection.readyState)
+// const callbackQuery = (query: CallbackQuery) => {
+//     const { message, data } = query;
 
-    const chatId = msg.chat.id;
-    bot.sendMessage(chatId, 'Welcome! Choose an option:', { reply_markup: keyboard})
-        .then((message) => {
-            console.log('message: ',message);
-            
-           bot.on('callback_query', handleCallbackQuery);
-        });
-    
-});
+//     const isChains = chain.includes(data as string);
 
-bot.on('message', (msg: Message) => {
-    const chatId = msg.chat.id;
-    const state = chatStates[chatId];
-    const message: string = msg.text || '';
+//     if(message && message.chat.id) {
+//         const chatId = message.chat.id;
 
-    if(state?.waitingForAddress && message) {
-        if(!isEvmValidation(message)) {
-            bot.sendMessage(chatId, 'Invalid address. Please enter a valid address:');
-        } else {
-            getDataAddress(chatId, message, {waitingForAddress: false}, chains);
-        }
-    } else if(state?.waitingForCollection && message) {
-        getDataCollection(chatId, message, {waitingForCollection: false}, chains);
-    }
-
-});
-
-bot.on('callback_query', (query) => {
-    const { message, data } = query;
-
-    const isChains = chain.includes(data as string);
-
-    if(message && message.chat.id) {
-        const chatId = message.chat.id;
-
-        if(isChains) {  
-            chains = data as Chain;
-            messageToDelete = message.message_id;
-            bot.sendMessage(chatId, `You clicked on ${chains} Chain. Now choose an option:`, opts)
-        }
+//         if(isChains) {  
+//             chains = data as Chain;
+//             messageToDelete = message.message_id;
+//             bot.sendMessage(chatId, `You clicked on ${chains} Chain. Now choose an option:`, createInlineKeyboardOptions(InlineKeyboardButtons))
+//         }
         
-        switch (data) {
-            case '/address':
-                messageToDelete = message.message_id;
-                setChatStateAndSendMessage(chatId, '📍Enter your address:', {waitingForAddress: true}, chains);
-                break;
-            case '/collection':
-                messageToDelete = message.message_id;
-                setChatStateAndSendMessage(chatId, '📕Enter your collection:', {waitingForCollection: true}, chains);
-                break;
-        }
-    }
+//         switch (data) {
+//             case '/token':
+//                 messageToDelete = message.message_id;
+//                 setChatStateAndSendMessage(chatId, '📍Enter your address:', {waitingForAddress: true}, chains);
+//                 break;
+//             case '/collection':
+//                 messageToDelete = message.message_id;
+//                 setChatStateAndSendMessage(chatId, '📕Enter your collection:', {waitingForCollection: true}, chains);
+//                 break;
+//         }
+//     }
 
-    if(messageToDelete) {
-        bot.deleteMessage(message?.chat.id || 0, messageToDelete);
-    }
+//     if(messageToDelete) {
+//         bot.deleteMessage(message?.chat.id || 0, messageToDelete);
+//     }
 
-});
+// }
 
-bot.setMyCommands(myCommands);
+// bot.setMyCommands(myCommands);
 
