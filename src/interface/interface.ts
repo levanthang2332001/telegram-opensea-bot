@@ -62,5 +62,9 @@ interface ChatState {
 }
 
 
+type NFTType = {
+    price: string;
+    currency: string;
+} & Partial<CollectionData>;
 
-export type { ResponseData, CollectionData, ChatState};
+export type { ResponseData, CollectionData, ChatState, NFTType};

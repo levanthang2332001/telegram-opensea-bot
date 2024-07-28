@@ -33,8 +33,8 @@ const selectButtons = [
 ]
 
 
-export type Chain = '/ethereum' | '/matic' | '/bsc' | '/fantom' | '/arbitrum' | '/avalanche' | '/optimism';
-const chain = ['/ethereum', '/matic', '/bsc', '/fantom', '/arbitrum', '/avalanche', '/optimism'] ;
+export type Chain = 'ethereum' | 'polygon' | 'bsc' | 'fantom' | 'arbitrum' | 'avalanche' | 'optimism';
+const chain = ['ethereum', 'polygon', 'bsc', 'fantom', 'arbitrum', 'avalanche', 'optimism'] ;
 
 export { 
     myCommands,
