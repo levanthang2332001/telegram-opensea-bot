@@ -12,6 +12,11 @@ const options = {
     headers: {accept: 'application/json', 'x-api-key': process.env.OPENSEA_API_KEY}
 };
 
+/**
+ * Get contract data from address
+ * src: https://docs.opensea.io/reference/get_contract
+ */
+
 export const GetCollectionFromAddress = async (address: string, chain: string): Promise<CollectionData> => {
     try {
         const response = await fetch(`https://api.opensea.io/api/v2/chain/${chain}/contract/${address}`, options);

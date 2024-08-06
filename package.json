@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@telegraf/entity": "^0.5.0",
     "@types/dotenv": "^8.2.0",
     "@types/node-telegram-bot-api": "^0.64.6",
     "dotenv": "^16.4.5",

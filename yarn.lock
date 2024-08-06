@@ -68,7 +68,14 @@
   dependencies:
     sparse-bitfield "^3.0.3"
 
-"@telegraf/types@^7.1.0":
+"@telegraf/entity@^0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@telegraf/entity/-/entity-0.5.0.tgz#b059e4f0d2e9331c79f0d7234af3ff1842cc01a3"
+  integrity sha512-4oHOoXcrNaK44zPq4GuTgMmUvCSQxJRVAuPFzVtSeiKzCBJnLeYblsMqWotokhrZSDnNpunC1sxhqI3iVYa/sg==
+  dependencies:
+    "@telegraf/types" "^7.0.1"
+
+"@telegraf/types@^7.0.1", "@telegraf/types@^7.1.0":
   version "7.1.0"
   resolved "https://registry.yarnpkg.com/@telegraf/types/-/types-7.1.0.tgz#d8bd9b2f5070b4de46971416e890338cd89fc23d"
   integrity sha512-kGevOIbpMcIlCDeorKGpwZmdH7kHbqlk/Yj6dEpJMKEQw5lk0KVQY0OLXaCswy8GqlIVLd5625OB+rAntP9xVw==

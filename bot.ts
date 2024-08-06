@@ -1,20 +1,19 @@
 import dotenv from 'dotenv';
-import  { CallbackQuery, Message } from 'node-telegram-bot-api';
+import { CallbackQuery } from 'node-telegram-bot-api';
 import { Telegraf } from 'telegraf';
-
-import { isEvmValidation } from './src/validation/evm';
-import { GetCollectionFromAddress, GetBestListingsByCollection } from './src/api/opensea';
 import { ChatState } from './src/interface';
-import { myCommands, chain, Chain, InlineKeyboardButtons, selectButtons } from './botCommands';
-import { createInlineKeyboardOptions } from './src/components/buttons/InlineKeyboardButtons';
+import { chain, Chain } from './src/commands/index';
 import mongoose from './src/libs/mongoose';
 
+import { 
+    receivedMessageContract 
+
+} from './src/components/messages/index';
 import { 
     displayButtonClickContractAndCollection,
     displayInlineKeyboardSelectButton,
     displayInlineKeyboardSelectNetwork, 
-    receivedMessageContract
-} from './src/commands/inlineKeyBoardButton';
+} from './src/components/buttons/index';
 
 dotenv.config();
 
@@ -48,7 +47,6 @@ bot.start((ctx, next) => {
     displayInlineKeyboardSelectButton(ctx);
 });
 
-
 bot.action("network", (ctx, next) => {
     deletedMessageId = (ctx.callbackQuery as CallbackQuery).message?.message_id || 0;
 
@@ -65,6 +63,8 @@ bot.on("callback_query", async (ctx) => {
     const data = (ctx.callbackQuery as CallbackQuery).data;
     const chatId = ctx.callbackQuery.message?.chat.id;
     const isChain = chain.includes(data as Chain);
+
+    console.log(data);
 
     if(!chatId) return
 
@@ -83,13 +83,15 @@ bot.on("callback_query", async (ctx) => {
             ctx.reply('Write the collection address');
             chatStates[chatId] = { waitingForCollection: true };
             break;
-        case 'back':
+        case 'backSelectionChain':
             displayInlineKeyboardSelectNetwork(ctx);
+            break;
+        case 'alert':
+            ctx.reply('Your alert has been set');
             break;
         default:
             break;
     }
-
     return;
     
 });
