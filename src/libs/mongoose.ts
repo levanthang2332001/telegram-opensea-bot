@@ -21,7 +21,7 @@ async function connect() {
                 return mongoose;
             });
     }
-
+    console.log('Connected to MongoDB');   
     return conn;
 }
 
@@ -31,6 +31,8 @@ async function disconnect() {
     }
 
     await mongoose.disconnect();
+    console.log('Disconnected to MongoDB');   
+
 }
 
 const db = { connect, disconnect };

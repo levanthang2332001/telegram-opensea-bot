@@ -1,16 +1,5 @@
 import mongoose from "mongoose";
-
-interface IUser {
-    userId: number;
-    username: string;
-    nft: {
-        collection: string;
-        address: string;
-        chain: string;
-        targetPrice: number;
-        currency: string;
-    };
-}
+import { IUser } from "../interface/index";
 
 const userSchema = new mongoose.Schema<IUser>({
     userId: { type: Number, required: true, unique: true },
