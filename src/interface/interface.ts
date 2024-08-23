@@ -58,7 +58,7 @@ interface CollectionData {
 
 interface ChatState {
     waitingForAddress?: boolean;
-    waitingForCollection?: boolean;
+    waitingForAlert?: boolean;
 }
 
 

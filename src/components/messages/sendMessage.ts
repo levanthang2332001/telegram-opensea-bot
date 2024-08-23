@@ -3,7 +3,9 @@ import { Context, Markup } from "telegraf";
 import { ChatState, NFTType } from "../../interface";
 import { isEvmValidation } from "../../validation/evm";
 import { getDataContract, getPriceCollection } from "../../api/getDataCollection";
+import { IUser } from "../../interface";
 
+let nfts = new Map<number, IUser>();
 
 const showDataNFT = (nft: NFTType) => {
     return `*${(nft.chain)?.toUpperCase()}*
@@ -28,11 +30,11 @@ const receivedMessageContract = async (ctx: Context, state: ChatState, chain: st
 
     if(state?.waitingForAddress) {
         const nft = await getDataContract(contract, chain)
+        console.log('nft', nft) 
         if(!nft) {
             ctx.reply('Contract not found');
             return;
         }
-
         ctx.replyWithMarkdownV2(showDataNFT(nft as NFTType),
             Markup.inlineKeyboard([
                 Markup.button.url("🔗 Go to Opensea", `https://opensea.io/assets/${contract}`),
@@ -43,16 +45,16 @@ const receivedMessageContract = async (ctx: Context, state: ChatState, chain: st
     }
 };
 
-const receivedMessageCollection = async (ctx: Context, state: ChatState, chain: string) => {
-    const collection = (ctx.message as Message).text;
+const receivedMessageAlert = async (ctx: Context, state: ChatState, chain: string) => {
+    const message = (ctx.message as Message).text;
 
-    if(!collection) {
-        ctx.reply('Collection not found');
+    if(!message) {
+        ctx.reply('Alert not found');
         return;
     }
 
-    if(state?.waitingForCollection) {
-        const nft = await getPriceCollection(collection, chain)
+    if(state?.waitingForAlert) {
+        const nft = await getPriceCollection(message, chain)
         if(!nft) {
             ctx.reply('Collection not found');
             return;
@@ -60,13 +62,13 @@ const receivedMessageCollection = async (ctx: Context, state: ChatState, chain: 
 
         ctx.replyWithMarkdownV2(nft,
             Markup.inlineKeyboard([
-                Markup.button.url("🔗 Go to Opensea", `https://opensea.io/collection/${collection}`),
+                Markup.button.url("🔗 Go to Opensea", `https://opensea.io/collection/${message}`),
                 Markup.button.callback("🔔 Set alert", "alert"),
             ])
         );
-        state.waitingForCollection = false;
+        state.waitingForAlert = false;
     }
 }
 
 
-export { receivedMessageContract }
+export { receivedMessageContract , receivedMessageAlert }
