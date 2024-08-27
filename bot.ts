@@ -6,13 +6,14 @@ import { chain, Chain } from './src/commands/index';
 import mongoose from './src/libs/mongoose';
 
 import { 
+    receivedMessageAlert,
     receivedMessageContract 
 
 } from './src/components/messages/index';
 import { 
     displayButtonClickContractAndCollection,
     displayInlineKeyboardSelectButton,
-    displayInlineKeyboardSelectNetwork, 
+    displayInlineKeyboardSelectNetwork,     
 } from './src/components/buttons/index';
 
 dotenv.config();
@@ -36,7 +37,6 @@ let deletedMessageId: number = 0;
 
 // Console log all messages
 // bot.use(Telegraf.log());
-
 
 bot.telegram.setMyCommands([
     {command: 'start', description: 'Start the bot'},
@@ -79,9 +79,9 @@ bot.on("callback_query", async (ctx) => {
             ctx.reply('Write the contract address');
             chatStates[chatId] = { waitingForAddress: true };
             break;
-        case 'collection':
-            ctx.reply('Write the collection address');
-            chatStates[chatId] = { waitingForCollection: true };
+        case 'alert':
+            ctx.reply('Set floor price alert');
+            chatStates[chatId] = { waitingForAlert: true };
             break;
         case 'backSelectionChain':
             displayInlineKeyboardSelectNetwork(ctx);
@@ -101,6 +101,10 @@ bot.on("message", async (ctx) => {
 
     if(state?.waitingForAddress) {
         receivedMessageContract(ctx, state, selectedChain);
+    }
+
+    if(state?.waitingForAlert) {
+        receivedMessageAlert(ctx, state, selectedChain);
     }
 });
 
