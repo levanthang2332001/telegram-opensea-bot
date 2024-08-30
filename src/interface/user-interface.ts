@@ -1,7 +1,8 @@
 export interface IUser {
     userId: number;
     username: string;
-    nft: [
+    name: string;
+    nfts: [
         {
             collection: string;
             address: string;

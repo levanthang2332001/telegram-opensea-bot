@@ -15,6 +15,8 @@ import {
     displayInlineKeyboardSelectButton,
     displayInlineKeyboardSelectNetwork,     
 } from './src/components/buttons/index';
+import { supabase } from './src/libs/supabaseClient';
+import { Json } from './src/types/supabase';
 
 dotenv.config();
 
@@ -43,8 +45,54 @@ bot.telegram.setMyCommands([
     {command: 'help', description: 'Help'},
 ]);
 
-bot.start((ctx, next) => {
-    displayInlineKeyboardSelectButton(ctx);
+
+const newUser = {
+    userid: 125,
+    username: "johnDic",
+    name: "John Smith",
+    nfts: [
+      {
+        collection: "Bored Ape Yacht Club",
+        address: "0xBC4CA0EDA7647a8aB7C2061C19C2100000F831BD",
+        chain: "Ethereum",
+        targetPrice: 100000,
+        currency: "ETH",
+      },
+      {
+        collection: "ACE",
+        address: "0xBC4CA0EDA7647a8aB7C2061C19C2100000F831BD",
+        chain: "Ethereum",
+        targetPrice: 100000,
+        currency: "ETH",
+      },
+    ],
+};
+
+const newNfts = {
+    collection: "Bored Ape Yacht Club",
+    address: "0xBC4CA0EDA7647a8aB7C2061C19C2100000F83013",
+    chain: "Ethereum",
+    targetPrice: 100000,
+    currency: "ETH",
+}
+
+
+bot.start(async (ctx, next) => {
+    displayInlineKeyboardSelectButton(ctx); 
+    
+    // supabase.from('users').insert([newUser]).then(result => console.log(result))
+
+    // const { data, error } = await supabase.from('users').select(`nfts`).eq('userid', 123)
+    // data?.filter(e => console.log(e.nfts))
+
+    // const nftArray: Json = []
+
+    // data?.map((nft) => nftArray.push([nft.nfts as Json, newNfts]))
+
+    // console.log(nftArray[0])
+
+
+    // supabase.from('users').update({nfts: { newNfts } }).eq('userid', 123).then(result => console.log(result))
 });
 
 bot.action("network", (ctx, next) => {
