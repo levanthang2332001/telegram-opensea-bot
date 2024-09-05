@@ -34,60 +34,38 @@ export type Database = {
   }
   public: {
     Tables: {
-      chains: {
-        Row: {
-          chain_id: number
-          chain_name: string
-        }
-        Insert: {
-          chain_id?: number
-          chain_name: string
-        }
-        Update: {
-          chain_id?: number
-          chain_name?: string
-        }
-        Relationships: []
-      }
       nfts: {
         Row: {
           address: string
-          chain_id: number | null
+          chain: string
           collection_name: string
           currency: string
           is_alert: boolean | null
           nft_id: number
-          targetPrice: number | null
-          user_id: number | null
+          targetprice: number | null
+          user_id: number
         }
         Insert: {
           address: string
-          chain_id?: number | null
+          chain: string
           collection_name: string
           currency: string
           is_alert?: boolean | null
           nft_id?: number
-          targetPrice?: number | null
-          user_id?: number | null
+          targetprice?: number | null
+          user_id: number
         }
         Update: {
           address?: string
-          chain_id?: number | null
+          chain?: string
           collection_name?: string
           currency?: string
           is_alert?: boolean | null
           nft_id?: number
-          targetPrice?: number | null
-          user_id?: number | null
+          targetprice?: number | null
+          user_id?: number
         }
         Relationships: [
-          {
-            foreignKeyName: "nfts_chain_id_fkey"
-            columns: ["chain_id"]
-            isOneToOne: false
-            referencedRelation: "chains"
-            referencedColumns: ["chain_id"]
-          },
           {
             foreignKeyName: "nfts_user_id_fkey"
             columns: ["user_id"]

@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import { CallbackQuery } from 'node-telegram-bot-api';
 import { Telegraf } from 'telegraf';
-import { ChatState } from './src/interface';
+import { ChatState, User } from './src/interface';
 import { chain, Chain } from './src/commands/index';
 
 import { 
@@ -14,7 +14,8 @@ import {
     displayInlineKeyboardSelectButton,
     displayInlineKeyboardSelectNetwork,     
 } from './src/components/buttons/index';
-import { User, addUser } from './src/database/addUser';
+import { addUser } from './src/database/addUser';
+import { supabase } from './src/libs/supabaseClient';
 
 dotenv.config();
 
@@ -45,17 +46,18 @@ bot.telegram.setMyCommands([
 
 bot.start(async (ctx) => {
     displayInlineKeyboardSelectButton(ctx);
+    
 
-    // If the user does not have a username, return
-    if (!ctx.message.from.username) return;
+    const { username, id, first_name } = ctx.message.from;
+
+    if (!username) return;
 
     // Add the user to the database
-    const user: User = {
-        user_id: Number(ctx.message.from.id),
-        username: ctx.message.from.username,
-        name: ctx.message.from.first_name
-    };
-    await addUser(user);
+    await addUser({
+        user_id: Number(id),
+        username,
+        name: first_name
+    });
 });
 
 bot.action("network", (ctx, next) => {

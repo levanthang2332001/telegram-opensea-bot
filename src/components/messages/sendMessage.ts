@@ -1,14 +1,12 @@
 import {  Message } from "node-telegram-bot-api";
 import { Context, Markup } from "telegraf";
-import { ChatState, NFTType } from "../../interface";
+import { ChatState, NFTAlert, NFTType } from "../../interface";
 import { isEvmValidation } from "../../validation/evm";
 import { getDataContract, getPriceCollection } from "../../api/getDataCollection";
-import { IUser } from "../../interface";
+import { supabase } from "../../libs/supabaseClient";
+import { addNftAlert } from "../../database/addNFTAlert";
 
-let currentNFT: NFTType | null = null;
-
-
-
+let currentNFT: NFTAlert | null = null;
 
 const showDataNFT = (nft: NFTType) => {
     return `*${(nft.chain)?.toUpperCase()}*
@@ -34,12 +32,16 @@ const receivedMessageContract = async (ctx: Context, state: ChatState, chain: st
     if(state?.waitingForAddress) {
         const nft = await getDataContract(contract, chain)
 
-        if(!nft) {
+        if(!nft || typeof nft === 'string') {
             ctx.reply('Contract not found');
             return;
         }
-
-        currentNFT = nft as NFTType;
+        currentNFT = {
+            collection_name: nft.collection ?? '',
+            address: nft.address ?? '',
+            currency: nft.currency,
+            chain: nft.chain ?? null,
+        };
 
         ctx.replyWithMarkdownV2(showDataNFT(nft as NFTType),
             Markup.inlineKeyboard([
@@ -53,7 +55,7 @@ const receivedMessageContract = async (ctx: Context, state: ChatState, chain: st
 };
 
 
-const receivedMessageAlert = async (ctx: Context, state: ChatState) => {
+const receivedMessageAlert = async (ctx: Context, state: ChatState): Promise<void> => {
     const messageText = (ctx.message as Message).text;
     const message = parseFloat(messageText as string);
 
@@ -62,12 +64,17 @@ const receivedMessageAlert = async (ctx: Context, state: ChatState) => {
         return;
     }
 
-    const { address, chain, collection, currency, name, price } = currentNFT as NFTType;
+    const { address, chain, collection_name, currency } = currentNFT as NFTAlert;
 
-    console.log(address, chain, collection, currency, name, price)
+    if(!collection_name || !address || !chain || !currency) {
+        ctx.reply('NFT not found');
+        return;
+    }
 
+    addNftAlert(currentNFT as NFTAlert, message, ctx.from?.id as number);
     
-    // ... rest of the function
+    state.waitingForAlert = false;
+
 }
 
 // Update the isNumber function to allow decimal numbers
