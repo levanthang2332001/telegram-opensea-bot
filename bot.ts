@@ -3,7 +3,6 @@ import { CallbackQuery } from 'node-telegram-bot-api';
 import { Telegraf } from 'telegraf';
 import { ChatState } from './src/interface';
 import { chain, Chain } from './src/commands/index';
-import mongoose from './src/libs/mongoose';
 
 import { 
     receivedMessageAlert,
@@ -15,8 +14,7 @@ import {
     displayInlineKeyboardSelectButton,
     displayInlineKeyboardSelectNetwork,     
 } from './src/components/buttons/index';
-import { supabase } from './src/libs/supabaseClient';
-import { Json } from './src/types/supabase';
+import { User, addUser } from './src/database/addUser';
 
 dotenv.config();
 
@@ -45,11 +43,19 @@ bot.telegram.setMyCommands([
     {command: 'help', description: 'Help'},
 ]);
 
+bot.start(async (ctx) => {
+    displayInlineKeyboardSelectButton(ctx);
 
-bot.start(async (ctx, next) => {
-    displayInlineKeyboardSelectButton(ctx); 
-    
-    
+    // If the user does not have a username, return
+    if (!ctx.message.from.username) return;
+
+    // Add the user to the database
+    const user: User = {
+        user_id: Number(ctx.message.from.id),
+        username: ctx.message.from.username,
+        name: ctx.message.from.first_name
+    };
+    await addUser(user);
 });
 
 bot.action("network", (ctx, next) => {
@@ -69,7 +75,7 @@ bot.on("callback_query", async (ctx) => {
     const chatId = ctx.callbackQuery.message?.chat.id;
     const isChain = chain.includes(data as Chain);
 
-    console.log(data);
+    console.log("callback_query", data);
 
     if(!chatId) return
 
@@ -85,7 +91,7 @@ bot.on("callback_query", async (ctx) => {
             chatStates[chatId] = { waitingForAddress: true };
             break;
         case 'alert':
-            ctx.reply('Set floor price alert');
+            ctx.reply('Write the floor price');
             chatStates[chatId] = { waitingForAlert: true };
             break;
         case 'backSelectionChain':
@@ -109,10 +115,9 @@ bot.on("message", async (ctx) => {
     }
 
     if(state?.waitingForAlert) {
-        receivedMessageAlert(ctx, state, selectedChain);
+        receivedMessageAlert(ctx, state);
     }
 });
-
 
 bot.launch().then(() => {
     console.log("Bot launched");
