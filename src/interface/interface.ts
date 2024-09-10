@@ -67,4 +67,34 @@ type NFTType = {
     currency: string;
 } & Partial<CollectionData>;
 
-export type { ResponseData, CollectionData, ChatState, NFTType};
+/* -------------------------------------------------------------- */
+
+type User = {
+    user_id: number,
+    username: string,
+    name: string
+}
+
+type NFTAlert = {
+    collection_name: string;
+    address: string;
+    currency: string | null;
+    chain: string | null;
+}
+
+type NFTAlertWithPrice = NFTAlert & {
+    nft_id: number;
+    targetprice: number;
+    is_alert: boolean;
+    user_id: number;
+}
+
+export type { 
+    ResponseData, 
+    CollectionData, 
+    ChatState, 
+    NFTType, 
+    User, 
+    NFTAlert,
+    NFTAlertWithPrice
+};

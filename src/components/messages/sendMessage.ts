@@ -1,40 +1,40 @@
 import {  Message } from "node-telegram-bot-api";
 import { Context, Markup } from "telegraf";
-import { ChatState, NFTType } from "../../interface";
+import { ChatState, NFTAlert, NFTType } from "../../interface";
 import { isEvmValidation } from "../../validation/evm";
 import { getDataContract, getPriceCollection } from "../../api/getDataCollection";
-import { IUser } from "../../interface";
+import { supabase } from "../../libs/supabaseClient";
+import { addNftAlert } from "../../database/addNFTAlert";
 
-let nfts = new Map<number, IUser>();
+let currentNFT: NFTAlert | null = null;
 
-const showDataNFT = (nft: NFTType) => {
-    return `*${(nft.chain)?.toUpperCase()}*
+const showDataNFT = (nft: NFTType) => `*${nft.chain?.toUpperCase()}*
 NFT: [${nft.name}](https://pro.opensea.io/collection/${nft.collection})\n
-_Floor Price: ${nft.price.replace(/\./g, '\\.')} ${nft.currency}_`
-}
+_Floor Price: ${nft.price.replace(/\./g, '\\.')} ${nft.currency}_`;
 
 const receivedMessageContract = async (ctx: Context, state: ChatState, chain: string) => {
     const contract = (ctx.message as Message).text;
 
-    const checkEvm = isEvmValidation(contract as string);
-
-    if(!checkEvm) {
+    if (!contract || !isEvmValidation(contract)) {
         ctx.reply('Invalid contract address');
         return;
     }
-    
-    if(!contract) {
-        ctx.reply('Contract not found');
-        return;
-    }
 
-    if(state?.waitingForAddress) {
-        const nft = await getDataContract(contract, chain)
-        console.log('nft', nft) 
-        if(!nft) {
+    if (state?.waitingForAddress) {
+        const nft = await getDataContract(contract, chain);
+
+        if (!nft || typeof nft === 'string') {
             ctx.reply('Contract not found');
             return;
         }
+
+        currentNFT = {
+            collection_name: nft.collection ?? '',
+            address: nft.address ?? '',
+            currency: nft.currency,
+            chain: nft.chain ?? null,
+        };
+
         ctx.replyWithMarkdownV2(showDataNFT(nft as NFTType),
             Markup.inlineKeyboard([
                 Markup.button.url("🔗 Go to Opensea", `https://opensea.io/assets/${contract}`),
@@ -45,30 +45,27 @@ const receivedMessageContract = async (ctx: Context, state: ChatState, chain: st
     }
 };
 
-const receivedMessageAlert = async (ctx: Context, state: ChatState, chain: string) => {
-    const message = (ctx.message as Message).text;
+const receivedMessageAlert = async (ctx: Context, state: ChatState): Promise<void> => {
+    const messageText = (ctx.message as Message).text;
+    const message = parseFloat(messageText as string);
 
-    if(!message) {
-        ctx.reply('Alert not found');
+    if (isNaN(message) || message <= 0) {
+        ctx.reply('Invalid alert value. Please enter a positive number.');
         return;
     }
 
-    if(state?.waitingForAlert) {
-        const nft = await getPriceCollection(message, chain)
-        if(!nft) {
-            ctx.reply('Collection not found');
-            return;
-        }
+    if (!currentNFT) return;
 
-        ctx.replyWithMarkdownV2(nft,
-            Markup.inlineKeyboard([
-                Markup.button.url("🔗 Go to Opensea", `https://opensea.io/collection/${message}`),
-                Markup.button.callback("🔔 Set alert", "alert"),
-            ])
-        );
-        state.waitingForAlert = false;
+    const { address, chain, collection_name, currency } = currentNFT;
+
+    if (!collection_name || !address || !chain || !currency) {
+        ctx.reply('NFT not found');
+        return;
     }
-}
 
+    addNftAlert(ctx, currentNFT, message, ctx.from?.id as number);
+    
+    state.waitingForAlert = false;
+}
 
 export { receivedMessageContract , receivedMessageAlert }
