@@ -26,9 +26,18 @@ const myNotification = async (ctx: Context, userId: number) => {
         return;
     }
 
-    notifications.forEach((nft) => {
-        displayInlineKeyboard(ctx, "My Notification", nft)
-    });
+    // console.log(notifications)
+
+    const groupedNotifications = notifications.reduce<NFTAlertWithPrice[][]>((acc, curr, index) => {
+        if (index % 3 === 0) {
+            acc.push([curr]);
+        } else {
+            acc[acc.length - 1].push(curr);
+        }
+        return acc;
+    }, []);
+
+    console.log(groupedNotifications)
 }
 
 export { myNotification }

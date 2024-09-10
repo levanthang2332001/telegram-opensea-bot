@@ -8,18 +8,28 @@
     "mongoose": "^8.4.0",
     "node-telegram-bot-api": "^0.66.0",
     "nodemon": "^3.1.0",
-    "regex-parser": "^2.3.0",
     "telegraf": "^4.16.3",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.5",
-    "url-loader": "^4.1.1"
+    "typescript": "^5.4.5"
   },
   "scripts": {
-    "dev": "npx nodemon --watch bot.ts --exec ts-node bot.ts",
-    "gen-types": "npx supabase gen types --lang typescript --linked > src/types/supabase.ts"
+    "dev": "nodemon",
+    "gen-types": "npx supabase gen types --lang typescript --linked > src/types/supabase.ts",
+    "start": "npx nodemon --watch bot.ts --exec ts-node bot.ts"
   },
   "devDependencies": {
     "@types/mongoose": "^5.11.97",
     "supabase": "^1.191.3"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "."
+    ],
+    "ext": "ts",
+    "ignore": [
+      "node_modules/",
+      "dist/"
+    ],
+    "exec": "ts-node ./bot.ts"
   }
 }

@@ -49,6 +49,8 @@ bot.telegram.setMyCommands([
 bot.start(async (ctx) => {
     displayInlineKeyboardSelectButton(ctx);
 
+    myNotification(ctx, ctx.message.from.id);
+
     const { username, id, first_name } = ctx.message.from;
 
     if (!username || !id || !first_name) return;
