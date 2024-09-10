@@ -1,4 +1,4 @@
-const messageofNetwork = "<b>Click on the network to select the chain</b>"
+const messageOfNetwork = "<b>Click on the network to select the chain</b>"
 
 const networks = [
     ["Ethereum", "Bsc", "Polygon"],
@@ -6,4 +6,4 @@ const networks = [
     ["Arbitrum"]
 ];
 
-export { messageofNetwork, networks }
+export { messageOfNetwork, networks }
