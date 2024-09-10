@@ -2,7 +2,11 @@ import { Context, Markup } from "telegraf";
 
 const displayInlineKeyboardSelectButton = (ctx: Context) => {
     const username = ctx.from?.username;
-    return ctx.reply(`Welcome @${username}! This is OPENSEA ALERT! 👋👋 \n\n 🔔 Opensea alert will keep you updated on the latest and most relevant NFT drops. \n 🔔Stay tuned for exclusive alerts and don't miss out on any opportunity! \n\n That’s all you need to know to get started. ⬇️`, {
+    return ctx.reply(`*Welcome @${username} ! This is OPENSEA ALERT! 👋👋
+
+    ✅ Opensea alert will keep you updated on the latest and most relevant NFT drops.\n
+    ✅ Stay tuned for exclusive alerts and don't miss out on any opportunity!\n
+    That's all you need to know to get started. ⬇️`, {
         parse_mode: "HTML",
         ...Markup.inlineKeyboard([
             Markup.button.callback("🌐 Select a network", "network"),

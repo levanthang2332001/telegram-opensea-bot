@@ -46,11 +46,10 @@ bot.telegram.setMyCommands([
 
 bot.start(async (ctx) => {
     displayInlineKeyboardSelectButton(ctx);
-    
 
     const { username, id, first_name } = ctx.message.from;
 
-    if (!username) return;
+    if (!username || !id || !first_name) return;
 
     // Add the user to the database
     await addUser({

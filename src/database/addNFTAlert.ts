@@ -1,12 +1,22 @@
+import { Context } from "telegraf";
+import { notification } from "../components/notification";
 import { NFTAlert } from "../interface";
 import { supabase } from "../libs/supabaseClient";
 
-const addNftAlert = async (nftAlert: NFTAlert, message: number, id: number): Promise<void> => {
+const addNftAlert = async (ctx :Context, nftAlert: NFTAlert, message: number | string, id: number): Promise<void> => {
     const { collection_name, address, chain, currency } = nftAlert;
 
     if (!collection_name || !address || !chain || !currency) {
         throw new Error('Missing required NFT alert information');
     }
+
+    // Convert the message to a number
+    const targetPrice = parseFloat(message.toString());
+    if (isNaN(targetPrice)) {
+        throw new Error('Invalid target price: must be a number');
+    }
+
+    console.log(targetPrice)
 
     const nftData = {
         user_id: id,
@@ -14,12 +24,12 @@ const addNftAlert = async (nftAlert: NFTAlert, message: number, id: number): Pro
         collection_name,
         chain,
         currency,
-        targetprice: message,
+        targetprice: targetPrice,
         is_alert: true,
     };
 
     try {
-        const { data, error, status } = await supabase
+        const { error, status } = await supabase
             .from('nfts')
             .insert(nftData)
             .select()
@@ -33,7 +43,7 @@ const addNftAlert = async (nftAlert: NFTAlert, message: number, id: number): Pro
             throw new Error(`Unexpected status code: ${status}`);
         }
 
-        console.log("NFT Alert added successfully:", data);
+        notification(ctx, "NFT Alert added successfully:");
     } catch (error) {
         console.error("Error adding NFT alert:", error);
         throw error;
