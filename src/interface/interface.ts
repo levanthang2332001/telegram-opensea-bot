@@ -67,12 +67,13 @@ type NFTType = {
     currency: string;
 } & Partial<CollectionData>;
 
+/* -------------------------------------------------------------- */
+
 type User = {
     user_id: number,
     username: string,
     name: string
 }
-
 
 type NFTAlert = {
     collection_name: string;
@@ -81,4 +82,19 @@ type NFTAlert = {
     chain: string | null;
 }
 
-export type { ResponseData, CollectionData, ChatState, NFTType, User, NFTAlert};
+type NFTAlertWithPrice = NFTAlert & {
+    nft_id: number;
+    targetprice: number;
+    is_alert: boolean;
+    user_id: number;
+}
+
+export type { 
+    ResponseData, 
+    CollectionData, 
+    ChatState, 
+    NFTType, 
+    User, 
+    NFTAlert,
+    NFTAlertWithPrice
+};

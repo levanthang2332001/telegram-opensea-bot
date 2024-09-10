@@ -43,7 +43,7 @@ const addNftAlert = async (ctx :Context, nftAlert: NFTAlert, message: number | s
             throw new Error(`Unexpected status code: ${status}`);
         }
 
-        notification(ctx, "NFT Alert added successfully:");
+        notification(ctx, "NFT Alert added successfully");
     } catch (error) {
         console.error("Error adding NFT alert:", error);
         throw error;

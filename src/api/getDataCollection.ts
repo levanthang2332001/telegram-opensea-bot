@@ -1,12 +1,10 @@
 import { GetBestListingsByCollection, GetCollectionFromAddress } from "./opensea";
 import { ChatState, CollectionData, NFTType } from "../interface";
-import { Chain } from "../commands/index";
-
 
 const convertToEth = (price: number) => {
     return price / Math.pow(10, 18);
 }
-
+    
 /**
  * Get data nft for collection
  *
@@ -15,15 +13,21 @@ const convertToEth = (price: number) => {
  * @param {ChatState} state
  * @param {Chain} chain
  */
-const getPriceCollection = async ( nft: string, chain: string) => {
+const getPriceCollection = async (nft: string, chain: string): Promise<string> => {
     try {
         const bestListings = await GetBestListingsByCollection(nft);
-        console.log("bestListings",bestListings);
         
-        const price = convertToEth(Number(bestListings.listings[0].price.current.value)) + bestListings.listings[0].price.current.currency;
-        return price
+        if (!bestListings.listings || bestListings.listings.length === 0) {
+            throw new Error('No listings found');
+        }
+        
+        const { value, currency } = bestListings.listings[0].price.current;
+        const priceInEth = convertToEth(Number(value)).toFixed(6);
+        
+        return `${priceInEth} ${currency}`;
     } catch (error) {
-        return `Error: ${error}`;
+        console.error('Error in getPriceCollection:', error);
+        return `Error: ${error instanceof Error ? error.message : String(error)}`;
     }
 }
 
@@ -34,32 +38,32 @@ const getPriceCollection = async ( nft: string, chain: string) => {
  * @param {string} chain
  * @return {*} 
  */
-const getDataContract = async ( address: string, chain: string) => {
-    // console.log(address, chain);
-    
+const getDataContract = async (address: string, chain: string): Promise<NFTType | string> => {
     try {
-        const collection: CollectionData = await GetCollectionFromAddress(address, chain);
-        
+        const collection = await GetCollectionFromAddress(address, chain);
+        if (!collection) {
+            throw new Error('Collection not found');
+        }
+
         const data = await GetBestListingsByCollection(collection.collection);
-        const priceNFT = convertToEth(Number(data.listings[0].price.current.value)).toString();
-        const currency = data.listings[0].price.current.currency;
+        if (!data || !data.listings || data.listings.length === 0) {
+            throw new Error('No listings found for the collection');
+        }
 
-        if(!collection) { return `Collection not found` }
-        if(!data) { return `Data not found` }
+        const { value, currency } = data.listings[0].price.current;
+        const priceNFT = convertToEth(Number(value)).toFixed(6)
 
-        const nft: NFTType = {
+        return {
             address: collection.address,
             chain: collection.chain,
             collection: collection.collection,
             name: collection.name,
             price: priceNFT,
-            currency: currency,
-        }
-
-        return nft;
-        
+            currency,
+        };
     } catch (error) {
-        return `There was an error: ${error}`;
+        console.error('Error in getDataContract:', error);
+        return `There was an error: ${error instanceof Error ? error.message : String(error)}`;
     }
 }
 

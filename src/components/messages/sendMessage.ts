@@ -8,31 +8,22 @@ import { addNftAlert } from "../../database/addNFTAlert";
 
 let currentNFT: NFTAlert | null = null;
 
-const showDataNFT = (nft: NFTType) => {
-    return `*${(nft.chain)?.toUpperCase()}*
+const showDataNFT = (nft: NFTType) => `*${nft.chain?.toUpperCase()}*
 NFT: [${nft.name}](https://pro.opensea.io/collection/${nft.collection})\n
-_Floor Price: ${nft.price.replace(/\./g, '\\.')} ${nft.currency}_`
-}
+_Floor Price: ${nft.price.replace(/\./g, '\\.')} ${nft.currency}_`;
 
 const receivedMessageContract = async (ctx: Context, state: ChatState, chain: string) => {
     const contract = (ctx.message as Message).text;
 
-    const checkEvm = isEvmValidation(contract as string);
-
-    if(!checkEvm) {
+    if (!contract || !isEvmValidation(contract)) {
         ctx.reply('Invalid contract address');
         return;
     }
-    
-    if(!contract) {
-        ctx.reply('Contract not found');
-        return;
-    }
 
-    if(state?.waitingForAddress) {
-        const nft = await getDataContract(contract, chain)
+    if (state?.waitingForAddress) {
+        const nft = await getDataContract(contract, chain);
 
-        if(!nft || typeof nft === 'string') {
+        if (!nft || typeof nft === 'string') {
             ctx.reply('Contract not found');
             return;
         }
@@ -52,9 +43,7 @@ const receivedMessageContract = async (ctx: Context, state: ChatState, chain: st
         );
         state.waitingForAddress = false;
     }
-    // console.log(currentNFT)
 };
-
 
 const receivedMessageAlert = async (ctx: Context, state: ChatState): Promise<void> => {
     const messageText = (ctx.message as Message).text;
@@ -65,23 +54,18 @@ const receivedMessageAlert = async (ctx: Context, state: ChatState): Promise<voi
         return;
     }
 
-    if(!currentNFT) return;
+    if (!currentNFT) return;
 
-    const { address, chain, collection_name, currency } = currentNFT as NFTAlert;
+    const { address, chain, collection_name, currency } = currentNFT;
 
-    if(!collection_name || !address || !chain || !currency) {
+    if (!collection_name || !address || !chain || !currency) {
         ctx.reply('NFT not found');
         return;
     }
 
-    addNftAlert(ctx , currentNFT as NFTAlert, message, ctx.from?.id as number);
+    addNftAlert(ctx, currentNFT, message, ctx.from?.id as number);
     
     state.waitingForAlert = false;
-
 }
-
-// Update the isNumber function to allow decimal numbers
-const isNumber = (value: string): boolean => /^\d*\.?\d+$/.test(value);
-
 
 export { receivedMessageContract , receivedMessageAlert }

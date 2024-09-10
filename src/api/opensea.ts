@@ -18,23 +18,24 @@ const options = {
  */
 
 export const GetCollectionFromAddress = async (address: string, chain: string): Promise<CollectionData> => {
-    try {
-        const response = await fetch(`https://api.opensea.io/api/v2/chain/${chain}/contract/${address}`, options);
-        const data = await response.json();
-        return data as CollectionData;
-    } catch (err) {
-        console.error(err);
-        throw new Error('Failed to fetch collection data');
-    }
+    const url = `https://api.opensea.io/api/v2/chain/${chain}/contract/${address}`;
+    return fetchData<CollectionData>(url, 'Failed to fetch collection data');
 };
 
-export const GetBestListingsByCollection = async (collection: string) => {
+export const GetBestListingsByCollection = async (collection: string): Promise<ResponseData> => {
+    const url = `https://api.opensea.io/api/v2/listings/collection/${collection}/best?limit=1`;
+    return fetchData<ResponseData>(url, 'Failed to fetch best listings');
+};
+
+async function fetchData<T>(url: string, errorMessage: string): Promise<T> {
     try {
-        const response = await fetch(`https://api.opensea.io/api/v2/listings/collection/${collection}/best?limit=1`, options);
-        const data = await response.json();
-        return data as ResponseData;
+        const response = await fetch(url, options);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.json() as T;
     } catch (err) {
         console.error(err);
-        throw new Error('Failed to fetch best listings');
+        throw new Error(errorMessage);
     }
-};
+}

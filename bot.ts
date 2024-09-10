@@ -12,10 +12,12 @@ import {
 import { 
     displayButtonClickContractAndCollection,
     displayInlineKeyboardSelectButton,
-    displayInlineKeyboardSelectNetwork,     
+    displayInlineKeyboard,     
 } from './src/components/buttons/index';
 import { addUser } from './src/database/addUser';
 import { supabase } from './src/libs/supabaseClient';
+import { myNotification } from './src/components/notification';
+import { messageofNetwork, networks } from './src/types/message';
 
 dotenv.config();
 
@@ -63,7 +65,7 @@ bot.action("network", (ctx, next) => {
     deletedMessageId = (ctx.callbackQuery as CallbackQuery).message?.message_id || 0;
 
     ctx.deleteMessage(deletedMessageId).then(() => {
-        displayInlineKeyboardSelectNetwork(ctx);
+        displayInlineKeyboard(ctx, messageofNetwork, networks);
     }).catch((err) => {
         console.error("Error deleting message:", err);
     });
@@ -76,7 +78,7 @@ bot.on("callback_query", async (ctx) => {
     const chatId = ctx.callbackQuery.message?.chat.id;
     const isChain = chain.includes(data as Chain);
 
-    console.log("callback_query", data);
+    console.log("callback_query");
 
     if(!chatId) return
 
@@ -88,15 +90,15 @@ bot.on("callback_query", async (ctx) => {
 
     switch(data) {
         case 'contract':
-            ctx.reply('Write the contract address');
+            ctx.reply('Enter the contract address');
             chatStates[chatId] = { waitingForAddress: true };
             break;
         case 'alert':
-            ctx.reply('Write the floor price');
+            ctx.reply('Enter the floor price');
             chatStates[chatId] = { waitingForAlert: true };
             break;
         case 'backSelectionChain':
-            displayInlineKeyboardSelectNetwork(ctx);
+            displayInlineKeyboard(ctx, messageofNetwork, networks);
             break;
         case 'alert':
             ctx.reply('Your alert has been set');
