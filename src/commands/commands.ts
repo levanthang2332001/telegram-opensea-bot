@@ -34,7 +34,7 @@ const selectButtons = [
 
 
 export type Chain = 'ethereum' | 'polygon' | 'bsc' | 'fantom' | 'arbitrum' | 'avalanche' | 'optimism';
-const chain = ['ethereum', 'polygon', 'bsc', 'fantom', 'arbitrum', 'avalanche', 'optimism'] ;
+const chain = ['ethereum', 'matic','base','arbitrum', 'avalanche', 'optimism'] ;
 
 export { 
     myCommands,

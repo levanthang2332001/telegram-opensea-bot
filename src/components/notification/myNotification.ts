@@ -26,8 +26,6 @@ const myNotification = async (ctx: Context, userId: number) => {
         return;
     }
 
-    // console.log(notifications)
-
     const groupedNotifications = notifications.reduce<NFTAlertWithPrice[][]>((acc, curr, index) => {
         if (index % 3 === 0) {
             acc.push([curr]);
@@ -37,7 +35,12 @@ const myNotification = async (ctx: Context, userId: number) => {
         return acc;
     }, []);
 
-    console.log(groupedNotifications)
+    const empt = groupedNotifications.map(e => {
+        return e
+    })
+    console.log(empt);
+
+    return groupedNotifications;
 }
 
 export { myNotification }

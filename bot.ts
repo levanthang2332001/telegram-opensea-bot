@@ -80,7 +80,7 @@ bot.on("callback_query", async (ctx) => {
     const chatId = ctx.callbackQuery.message?.chat.id;
     const isChain = chain.includes(data as Chain);
 
-    console.log("callback_query");
+    console.log("callback_query", data);
 
     if(!chatId) return
 
