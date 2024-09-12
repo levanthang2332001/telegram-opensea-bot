@@ -17,7 +17,7 @@ import {
 import { addUser } from './src/database/addUser';
 import { supabase } from './src/libs/supabaseClient';
 import { myNotification } from './src/components/notification';
-import { messageofNetwork, networks } from './src/types/message';
+import { messageOfNetwork, networks } from './src/types/message';
 
 dotenv.config();
 
@@ -67,7 +67,7 @@ bot.action("network", (ctx, next) => {
     deletedMessageId = (ctx.callbackQuery as CallbackQuery).message?.message_id || 0;
 
     ctx.deleteMessage(deletedMessageId).then(() => {
-        displayInlineKeyboard(ctx, messageofNetwork, networks);
+        displayInlineKeyboard(ctx, messageOfNetwork, networks);
     }).catch((err) => {
         console.error("Error deleting message:", err);
     });
@@ -100,7 +100,7 @@ bot.on("callback_query", async (ctx) => {
             chatStates[chatId] = { waitingForAlert: true };
             break;
         case 'backSelectionChain':
-            displayInlineKeyboard(ctx, messageofNetwork, networks);
+            displayInlineKeyboard(ctx, messageOfNetwork, networks);
             break;
         case 'alert':
             ctx.reply('Your alert has been set');
