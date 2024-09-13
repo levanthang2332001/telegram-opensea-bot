@@ -16,7 +16,7 @@ import {
 } from './src/components/buttons/index';
 import { addUser } from './src/database/addUser';
 import { supabase } from './src/libs/supabaseClient';
-import { myNotification } from './src/components/notification';
+import { collectionNames, groupedNotifications, myNotification } from './src/components/notification';
 import { messageOfNetwork, networks } from './src/types/message';
 
 dotenv.config();
@@ -73,6 +73,30 @@ bot.action("network", (ctx, next) => {
     });
 
     return;
+});
+
+bot.action("notification", async (ctx) => {
+    const id = ctx.from?.id;
+
+    if (id) {
+        const data = await myNotification(ctx, id);
+        const clNames = collectionNames(data);
+
+        const grouped = groupedNotifications(clNames);
+
+        const collectionName = grouped?.flatMap(group => 
+            group.map(item => item.collection_name)
+        );
+        console.log("Collection names:", collectionName);
+
+        const value = grouped?.map((e, idx) => {
+            return e[idx].collection_name;
+        });
+
+        console.log(value);
+    } else {
+        console.error("User ID not found in notification action");
+    }
 });
 
 bot.on("callback_query", async (ctx) => {
