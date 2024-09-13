@@ -16,8 +16,8 @@ import {
 } from './src/components/buttons/index';
 import { addUser } from './src/database/addUser';
 import { supabase } from './src/libs/supabaseClient';
-import { myNotification } from './src/components/notification';
-import { messageOfNetwork, networks } from './src/types/message';
+import { collectionNames, groupedNotifications, myNotification } from './src/components/notification';
+import { messageOfNetwork, messageOfNotification, networks } from './src/types/message';
 
 dotenv.config();
 
@@ -75,12 +75,32 @@ bot.action("network", (ctx, next) => {
     return;
 });
 
+bot.action("notification", async (ctx) => {
+    const id = ctx.from?.id;
+    if (!id) {
+        console.error("User ID not found in notification action");
+        return;
+    }
+
+    try {
+        const notifications = await myNotification(ctx, id);
+        if (!notifications || notifications.length === 0) {
+            return; 
+        }
+
+        const collectionNames = notifications.map(item => [item.collection_name]);
+        displayInlineKeyboard(ctx, messageOfNotification, collectionNames);
+    } catch (error) {
+        console.error("Error in notification action:", error);
+    }
+});
+
 bot.on("callback_query", async (ctx) => {
     const data = (ctx.callbackQuery as CallbackQuery).data;
     const chatId = ctx.callbackQuery.message?.chat.id;
     const isChain = chain.includes(data as Chain);
 
-    console.log("callback_query");
+    console.log("callback_query", data);
 
     if(!chatId) return
 

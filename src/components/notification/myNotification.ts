@@ -26,9 +26,7 @@ const myNotification = async (ctx: Context, userId: number) => {
         return;
     }
 
-    // console.log(notifications)
-
-    const groupedNotifications = notifications.reduce<NFTAlertWithPrice[][]>((acc, curr, index) => {
+   /* const groupedNotifications = notifications.reduce<NFTAlertWithPrice[][]>((acc, curr, index) => {
         if (index % 3 === 0) {
             acc.push([curr]);
         } else {
@@ -37,8 +35,30 @@ const myNotification = async (ctx: Context, userId: number) => {
         return acc;
     }, []);
 
-    console.log(groupedNotifications)
+    */
+
+    return notifications;
 }
 
-export { myNotification }
+const groupedNotifications = (notifications: NFTAlertWithPrice[] | undefined) => {
+    if(!notifications) return;
+
+    const groupedNotifications = notifications.reduce<NFTAlertWithPrice[][]>((acc, curr, index) => {
+        if (index % 1 === 0) {
+            acc.push([curr]);
+        } else {
+            acc[acc.length - 1].push(curr);
+        }
+        return acc;
+    }, []);
+
+    return groupedNotifications
+}
+
+const collectionNames = (collectionNames: NFTAlertWithPrice[] | undefined) => {
+    if(!collectionNames) return;
+    return collectionNames.map(e => e);
+}
+
+export { myNotification,  collectionNames, groupedNotifications}
 
