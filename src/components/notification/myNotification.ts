@@ -44,7 +44,7 @@ const groupedNotifications = (notifications: NFTAlertWithPrice[] | undefined) =>
     if(!notifications) return;
 
     const groupedNotifications = notifications.reduce<NFTAlertWithPrice[][]>((acc, curr, index) => {
-        if (index % 3 === 0) {
+        if (index % 1 === 0) {
             acc.push([curr]);
         } else {
             acc[acc.length - 1].push(curr);
