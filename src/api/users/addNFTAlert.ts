@@ -1,7 +1,7 @@
 import { Context } from "telegraf";
-import { notification } from "../components/notification";
-import { NFTAlert } from "../interface";
-import { supabase } from "../libs/supabaseClient";
+import { notification } from "../../components/notifications";
+import { NFTAlert } from "../../interface";
+import { supabase } from "../../libs/supabaseClient";
 
 const addNftAlert = async (ctx :Context, nftAlert: NFTAlert, message: number | string, id: number): Promise<void> => {
     const { name, collection_name, address, chain, currency } = nftAlert;

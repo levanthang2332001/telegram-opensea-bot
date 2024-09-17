@@ -2,9 +2,9 @@ import {  Message } from "node-telegram-bot-api";
 import { Context, Markup } from "telegraf";
 import { ChatState, NFTAlert, NFTType } from "../../interface";
 import { isEvmValidation } from "../../validation/evm";
-import { getDataContract, getPriceCollection } from "../../api/getDataCollection";
+import { getDataContract, getPriceCollection } from "../../api/openseas/show-data";
 import { supabase } from "../../libs/supabaseClient";
-import { addNftAlert } from "../../database/addNFTAlert";
+import { addNftAlert } from "../../api/users/addNFTAlert";
 
 let currentNFT: NFTAlert | null = null;
 

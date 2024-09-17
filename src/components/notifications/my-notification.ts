@@ -17,24 +17,16 @@ const myNotification = async (ctx: Context, userId: number) => {
     return notifications;
 }
 
-const groupedNotifications = (notifications: NFTAlertWithPrice[] | undefined) => {
-    if(!notifications) return;
-
-    const groupedNotifications = notifications.reduce<NFTAlertWithPrice[][]>((acc, curr, index) => {
-        if (index % 1 === 0) {
-            acc.push([curr]);
-        } else {
-            acc[acc.length - 1].push(curr);
-        }
-        return acc;
-    }, []);
-
-    return groupedNotifications
-}
-
 const collectionNames = (collectionNames: NFTAlertWithPrice[] | undefined) => {
     if(!collectionNames) return;
     return collectionNames.map(e => e);
+}
+
+const groupedNotifications = (notifications: NFTAlertWithPrice[]) => {
+    return notifications.map(value => [{
+        text: value.name,
+        callback_data: value.collection_name
+    }]) 
 }
 
 export { myNotification,  collectionNames, groupedNotifications}

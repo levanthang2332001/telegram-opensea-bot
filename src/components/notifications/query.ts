@@ -15,17 +15,20 @@ const fetchUserNotifications = async <T>(userId: number): Promise<T | null> => {
     return data as T;
 }
 
-const fetchNftWithName = async <T>(userId: number, name: string): Promise<T | null> => {
+const fetchNftWithName = async <T>(userId: number, callback_data: string): Promise<T | null> => {
+    // console.log(userId, name);
     const { data, error } = await supabase
         .from('nfts')
         .select('*')
         .eq('user_id', userId)
-        .eq('name', name);
+        .eq('collection_name', callback_data);
        
     if (error) {
         console.error('Error fetching notifications:', error);
         return null;
     }
+
+    console.log(data);
     return data as T;
 }
 
