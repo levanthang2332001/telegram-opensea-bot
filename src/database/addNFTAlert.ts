@@ -4,7 +4,7 @@ import { NFTAlert } from "../interface";
 import { supabase } from "../libs/supabaseClient";
 
 const addNftAlert = async (ctx :Context, nftAlert: NFTAlert, message: number | string, id: number): Promise<void> => {
-    const { collection_name, address, chain, currency } = nftAlert;
+    const { name, collection_name, address, chain, currency } = nftAlert;
 
     if (!collection_name || !address || !chain || !currency) {
         throw new Error('Missing required NFT alert information');
@@ -20,6 +20,7 @@ const addNftAlert = async (ctx :Context, nftAlert: NFTAlert, message: number | s
 
     const nftData = {
         user_id: id,
+        name,
         address,
         collection_name,
         chain,

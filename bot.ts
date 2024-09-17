@@ -88,7 +88,7 @@ bot.action("notification", async (ctx) => {
             return; 
         }
 
-        const collectionNames = notifications.map(item => [item.collection_name]);
+        const collectionNames = notifications.map(item => [item.name]);
         displayInlineKeyboard(ctx, messageOfNotification, collectionNames);
     } catch (error) {
         console.error("Error in notification action:", error);
@@ -126,6 +126,7 @@ bot.on("callback_query", async (ctx) => {
             ctx.reply('Your alert has been set');
             break;
         default:
+            console.log('default', data);
             break;
     }
     return;

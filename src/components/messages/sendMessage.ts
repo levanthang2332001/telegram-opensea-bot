@@ -23,12 +23,15 @@ const receivedMessageContract = async (ctx: Context, state: ChatState, chain: st
     if (state?.waitingForAddress) {
         const nft = await getDataContract(contract, chain);
 
+        console.log("nft", nft);
+
         if (!nft || typeof nft === 'string') {
             ctx.reply('Contract not found');
             return;
         }
 
         currentNFT = {
+            name: nft.name ?? '',
             collection_name: nft.collection ?? '',
             address: nft.address ?? '',
             currency: nft.currency,
