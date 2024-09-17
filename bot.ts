@@ -1,27 +1,27 @@
 import dotenv from 'dotenv';
 import { CallbackQuery } from 'node-telegram-bot-api';
 import { Telegraf } from 'telegraf';
-import { ChatState, User } from './src/interface';
+import { ChatState, NFTAlertWithPrice, User } from './src/interface';
 import { chain, Chain } from './src/commands/index';
 
-import { 
+import {
     receivedMessageAlert,
-    receivedMessageContract 
+    receivedMessageContract
 
 } from './src/components/messages/index';
-import { 
+import {
     displayButtonClickContractAndCollection,
     displayInlineKeyboardSelectButton,
-    displayInlineKeyboard,     
+    displayInlineKeyboard,
 } from './src/components/buttons/index';
-import { addUser } from './src/database/addUser';
-import { supabase } from './src/libs/supabaseClient';
-import { collectionNames, groupedNotifications, myNotification } from './src/components/notification';
+import { addUser } from './src/api/users/addUser';
+import { groupedNotifications, myNotification } from './src/components/notifications';
 import { messageOfNetwork, messageOfNotification, networks } from './src/types/message';
+import { fetchNftWithName } from './src/components/notifications/query';
 
 dotenv.config();
 
-if(!process.env.TELEGRAM_BOT_TOKEN) {
+if (!process.env.TELEGRAM_BOT_TOKEN) {
     console.log('Error: Telegram bot token is not provided.');
     process.exit(1);
 }
@@ -42,14 +42,13 @@ let deletedMessageId: number = 0;
 // bot.use(Telegraf.log());
 
 bot.telegram.setMyCommands([
-    {command: 'start', description: 'Start the bot'},
-    {command: 'help', description: 'Help'},
+    { command: 'start', description: 'Start the bot' },
+    { command: 'help', description: 'Help' },
+    { command: 'notification', description: 'Notification' },
 ]);
 
 bot.start(async (ctx) => {
     displayInlineKeyboardSelectButton(ctx);
-
-    myNotification(ctx, ctx.message.from.id);
 
     const { username, id, first_name } = ctx.message.from;
 
@@ -84,11 +83,11 @@ bot.action("notification", async (ctx) => {
 
     try {
         const notifications = await myNotification(ctx, id);
-        if (!notifications || notifications.length === 0) {
-            return; 
-        }
 
-        const collectionNames = notifications.map(item => [item.collection_name]);
+        if (!notifications || notifications.length === 0) return;
+
+        const collectionNames = groupedNotifications(notifications).flat()
+
         displayInlineKeyboard(ctx, messageOfNotification, collectionNames);
     } catch (error) {
         console.error("Error in notification action:", error);
@@ -99,18 +98,19 @@ bot.on("callback_query", async (ctx) => {
     const data = (ctx.callbackQuery as CallbackQuery).data;
     const chatId = ctx.callbackQuery.message?.chat.id;
     const isChain = chain.includes(data as Chain);
+    const userId = ctx.from?.id;
 
     console.log("callback_query", data);
 
-    if(!chatId) return
+    if (!chatId || !data || !userId) return
 
     selectedChain = isChain ? data as Chain : selectedChain;
 
-    if(isChain) {
+    if (isChain) {
         displayButtonClickContractAndCollection(ctx, selectedChain);
     }
 
-    switch(data) {
+    switch (data) {
         case 'contract':
             ctx.reply('Enter the contract address');
             chatStates[chatId] = { waitingForAddress: true };
@@ -122,24 +122,25 @@ bot.on("callback_query", async (ctx) => {
         case 'backSelectionChain':
             displayInlineKeyboard(ctx, messageOfNetwork, networks);
             break;
-        case 'alert':
+        case 'delete':
             ctx.reply('Your alert has been set');
             break;
         default:
+            await fetchNftWithName<NFTAlertWithPrice>(userId, data);
             break;
     }
     return;
-    
+
 });
 
 bot.on("message", async (ctx) => {
     const state = chatStates[ctx.message.chat.id];
 
-    if(state?.waitingForAddress) {
+    if (state?.waitingForAddress) {
         receivedMessageContract(ctx, state, selectedChain);
     }
 
-    if(state?.waitingForAlert) {
+    if (state?.waitingForAlert) {
         receivedMessageAlert(ctx, state);
     }
 });
@@ -147,7 +148,7 @@ bot.on("message", async (ctx) => {
 bot.launch().then(() => {
     console.log("Bot launched");
 });
-  
+
 process.on("SIGTERM", () => {
     bot.stop();
 });

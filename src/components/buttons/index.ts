@@ -1,1 +1,1 @@
-export * from './InlineKeyboardButtons';
+export * from './button';

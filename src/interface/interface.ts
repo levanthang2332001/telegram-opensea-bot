@@ -76,6 +76,7 @@ type User = {
 }
 
 type NFTAlert = {
+    name: string;
     collection_name: string;
     address: string;
     currency: string | null;

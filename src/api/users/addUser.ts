@@ -1,5 +1,5 @@
-import { User } from "../interface";
-import { supabase } from "./../libs/supabaseClient"
+import { User } from "../../interface";
+import { supabase } from "../../libs/supabaseClient"
 
 const isCheckUserExists = async (id: number): Promise<boolean> => {
     if(id === undefined || "") return false; 
