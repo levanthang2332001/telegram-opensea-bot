@@ -95,38 +95,44 @@ bot.action("notification", async (ctx) => {
 });
 
 bot.on("callback_query", async (ctx) => {
-    const { data, message } = ctx.callbackQuery as CallbackQuery;
-    const chatId = message?.chat.id;
+    const data = (ctx.callbackQuery as CallbackQuery).data;
+    const chatId = ctx.callbackQuery.message?.chat.id;
+    const isChain = chain.includes(data as Chain);
     const userId = ctx.from?.id;
-
-    if (!chatId || !data || !userId) return;
 
     console.log("callback_query", data);
 
-    const isChain = chain.includes(data as Chain);
+    if (!chatId || !data || !userId) return
+
+    selectedChain = isChain ? data as Chain : selectedChain;
+
     if (isChain) {
-        selectedChain = data as Chain;
         displayButtonClickContract(ctx, selectedChain);
     }
 
-    const actions = {
-        'contract': () => {
+    switch (data) {
+        case 'contract':
             ctx.reply('Enter the contract address');
             chatStates[chatId] = { waitingForAddress: true };
-        },
-        'alert': () => {
+            break;
+        case 'alert':
             ctx.reply('Enter the floor price');
             chatStates[chatId] = { waitingForAlert: true };
-        },
-        'backSelectionChain': () => displayInlineKeyboard(ctx, messageOfNetwork, networks),
-        'delete': () => ctx.reply('Your alert has been set'),
-        'default': async () => {
+            break;
+        case 'backSelectionChain':
+            displayInlineKeyboard(ctx, messageOfNetwork, networks);
+            break;
+        case 'delete':
+            ctx.reply('Your alert has been set');
+            break;
+        default:
             const alertNFT = await fetchNftWithName<NFTAlertWithPrice>(userId, data);
-            if (alertNFT) showAlertNft(ctx, alertNFT);
-        }
-    };
+            if (!alertNFT) return;
+            showAlertNft(ctx, alertNFT);
+            break;
+    }
+    return;
 
-    (actions[data as keyof typeof actions] || actions.default)();
 });
 
 bot.on("message", async (ctx) => {
