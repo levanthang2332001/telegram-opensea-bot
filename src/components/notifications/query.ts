@@ -28,7 +28,6 @@ const fetchNftWithName = async <T>(userId: number, callback_data: string): Promi
         return null;
     }
 
-    console.log(data);
     return data as T;
 }
 

@@ -1,5 +1,6 @@
 import { Context, Markup } from "telegraf";
 import { NFTAlertWithPrice } from "../../interface";
+import { message } from "telegraf/filters";
 
 const displayInlineKeyboardSelectButton = (ctx: Context) => {
     const username = ctx.from?.username;
@@ -39,7 +40,20 @@ const displayInlineKeyboard = <T extends string[][] | INofitication[]>(ctx: Cont
     });
 }
 
-const displayButtonClickContractAndCollection = (ctx: Context, chain: string) => {
+const displayButtonClickNft = (ctx: Context, nft: string, message: string) => {
+    const keyboard = [
+        [Markup.button.callback("Disable", "")],
+        [Markup.button.callback("Edit", "")]
+    ];
+
+    return ctx.reply(message, {
+        parse_mode: "HTML",
+        ...Markup.inlineKeyboard(keyboard),
+    });
+
+}
+
+const displayButtonClickContract = (ctx: Context, chain: string) => {
     const keyboard = [
         [Markup.button.callback("📜 Contract", "contract")],
         [Markup.button.callback("← Back", "backSelectionChain")]
@@ -54,5 +68,5 @@ const displayButtonClickContractAndCollection = (ctx: Context, chain: string) =>
 export { 
     displayInlineKeyboardSelectButton, 
     displayInlineKeyboard, 
-    displayButtonClickContractAndCollection,
+    displayButtonClickContract,
 };

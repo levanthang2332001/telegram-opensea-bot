@@ -7,27 +7,24 @@ import { fetchUserNotifications } from "./query";
 
 
 const myNotification = async (ctx: Context, userId: number) => {
-    const notifications = await fetchUserNotifications<NFTAlertWithPrice[]>(userId);
+    const data = await fetchUserNotifications<NFTAlertWithPrice[]>(userId);
 
-    if (!notifications || notifications.length === 0) {
+    if (!data || data.length === 0) {
         await notification(ctx, "You have no notifications");
         return;
     }
 
-    return notifications;
+    return data;
 }
 
-const collectionNames = (collectionNames: NFTAlertWithPrice[] | undefined) => {
-    if(!collectionNames) return;
-    return collectionNames.map(e => e);
-}
-
+/* Convert data to [[]] */
 const groupedNotifications = (notifications: NFTAlertWithPrice[]) => {
-    return notifications.map(value => [{
-        text: value.name,
-        callback_data: value.collection_name
-    }]) 
+    return notifications.map(({ name, collection_name }) => ({
+        text: name,
+        callback_data: collection_name
+    }));
 }
 
-export { myNotification,  collectionNames, groupedNotifications}
+
+export { myNotification, groupedNotifications}
 

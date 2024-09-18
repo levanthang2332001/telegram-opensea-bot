@@ -10,7 +10,7 @@ import {
 
 } from './src/components/messages/index';
 import {
-    displayButtonClickContractAndCollection,
+    displayButtonClickContract,
     displayInlineKeyboardSelectButton,
     displayInlineKeyboard,
 } from './src/components/buttons/index';
@@ -18,6 +18,7 @@ import { addUser } from './src/api/users/addUser';
 import { groupedNotifications, myNotification } from './src/components/notifications';
 import { messageOfNetwork, messageOfNotification, networks } from './src/types/message';
 import { fetchNftWithName } from './src/components/notifications/query';
+import { showAlertNft } from './src/components/messages/show-alert';
 
 dotenv.config();
 
@@ -82,55 +83,50 @@ bot.action("notification", async (ctx) => {
     }
 
     try {
-        const notifications = await myNotification(ctx, id);
+        const dataOfNFT = await myNotification(ctx, id);
 
-        if (!notifications || notifications.length === 0) return;
+        if (!dataOfNFT || dataOfNFT.length === 0) return;
 
-        const collectionNames = groupedNotifications(notifications).flat()
-
-        displayInlineKeyboard(ctx, messageOfNotification, collectionNames);
+        const groupedData = groupedNotifications(dataOfNFT).flat()
+        displayInlineKeyboard(ctx, messageOfNotification, groupedData);
     } catch (error) {
         console.error("Error in notification action:", error);
     }
 });
 
 bot.on("callback_query", async (ctx) => {
-    const data = (ctx.callbackQuery as CallbackQuery).data;
-    const chatId = ctx.callbackQuery.message?.chat.id;
-    const isChain = chain.includes(data as Chain);
+    const { data, message } = ctx.callbackQuery as CallbackQuery;
+    const chatId = message?.chat.id;
     const userId = ctx.from?.id;
+
+    if (!chatId || !data || !userId) return;
 
     console.log("callback_query", data);
 
-    if (!chatId || !data || !userId) return
-
-    selectedChain = isChain ? data as Chain : selectedChain;
-
+    const isChain = chain.includes(data as Chain);
     if (isChain) {
-        displayButtonClickContractAndCollection(ctx, selectedChain);
+        selectedChain = data as Chain;
+        displayButtonClickContract(ctx, selectedChain);
     }
 
-    switch (data) {
-        case 'contract':
+    const actions = {
+        'contract': () => {
             ctx.reply('Enter the contract address');
             chatStates[chatId] = { waitingForAddress: true };
-            break;
-        case 'alert':
+        },
+        'alert': () => {
             ctx.reply('Enter the floor price');
             chatStates[chatId] = { waitingForAlert: true };
-            break;
-        case 'backSelectionChain':
-            displayInlineKeyboard(ctx, messageOfNetwork, networks);
-            break;
-        case 'delete':
-            ctx.reply('Your alert has been set');
-            break;
-        default:
-            await fetchNftWithName<NFTAlertWithPrice>(userId, data);
-            break;
-    }
-    return;
+        },
+        'backSelectionChain': () => displayInlineKeyboard(ctx, messageOfNetwork, networks),
+        'delete': () => ctx.reply('Your alert has been set'),
+        'default': async () => {
+            const alertNFT = await fetchNftWithName<NFTAlertWithPrice>(userId, data);
+            if (alertNFT) showAlertNft(ctx, alertNFT);
+        }
+    };
 
+    (actions[data as keyof typeof actions] || actions.default)();
 });
 
 bot.on("message", async (ctx) => {
