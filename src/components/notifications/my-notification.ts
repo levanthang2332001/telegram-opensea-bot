@@ -6,7 +6,7 @@ import { displayInlineKeyboard } from "../buttons";
 import { fetchUserNotifications } from "./query";
 
 
-const myNotification = async (ctx: Context, userId: number) => {
+const myNotification = async (ctx: Context, userId: number): Promise<NFTAlertWithPrice[] | undefined> => {
     const data = await fetchUserNotifications<NFTAlertWithPrice[]>(userId);
 
     if (!data || data.length === 0) {

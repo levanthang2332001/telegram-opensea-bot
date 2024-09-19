@@ -18,7 +18,7 @@ import { addUser } from './src/api/users/addUser';
 import { groupedNotifications, myNotification } from './src/components/notifications';
 import { messageOfNetwork, messageOfNotification, networks } from './src/types/message';
 import { fetchNftWithName } from './src/components/notifications/query';
-import { showAlertNft } from './src/components/messages/show-alert';
+import { disableAlertNft, showAlertNft } from './src/components/messages/show-alert';
 
 dotenv.config();
 
@@ -63,6 +63,10 @@ bot.start(async (ctx) => {
     });
 });
 
+bot.action("disable", async (ctx) => {
+    disableAlertNft();
+})
+
 bot.action("network", (ctx, next) => {
     deletedMessageId = (ctx.callbackQuery as CallbackQuery).message?.message_id || 0;
 
@@ -74,6 +78,7 @@ bot.action("network", (ctx, next) => {
 
     return;
 });
+
 
 bot.action("notification", async (ctx) => {
     const id = ctx.from?.id;
