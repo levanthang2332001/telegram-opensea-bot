@@ -2,9 +2,9 @@ import {  Message } from "node-telegram-bot-api";
 import { Context, Markup } from "telegraf";
 import { ChatState, NFTAlert, NFTType } from "../../interface";
 import { isEvmValidation } from "../../validation/evm";
-import { getDataContract, getPriceCollection } from "../../api/getDataCollection";
+import { getDataContract, getPriceCollection } from "../../api/openseas/show-data";
 import { supabase } from "../../libs/supabaseClient";
-import { addNftAlert } from "../../database/addNFTAlert";
+import { addNftAlert } from "../../api/users/addNFTAlert";
 
 let currentNFT: NFTAlert | null = null;
 
@@ -23,12 +23,15 @@ const receivedMessageContract = async (ctx: Context, state: ChatState, chain: st
     if (state?.waitingForAddress) {
         const nft = await getDataContract(contract, chain);
 
+        console.log("nft", nft);
+
         if (!nft || typeof nft === 'string') {
             ctx.reply('Contract not found');
             return;
         }
 
         currentNFT = {
+            name: nft.name ?? '',
             collection_name: nft.collection ?? '',
             address: nft.address ?? '',
             currency: nft.currency,

@@ -41,6 +41,7 @@ export type Database = {
           collection_name: string
           currency: string
           is_alert: boolean | null
+          name: string | null
           nft_id: number
           targetprice: number | null
           user_id: number
@@ -51,6 +52,7 @@ export type Database = {
           collection_name: string
           currency: string
           is_alert?: boolean | null
+          name?: string | null
           nft_id?: number
           targetprice?: number | null
           user_id: number
@@ -61,6 +63,7 @@ export type Database = {
           collection_name?: string
           currency?: string
           is_alert?: boolean | null
+          name?: string | null
           nft_id?: number
           targetprice?: number | null
           user_id?: number

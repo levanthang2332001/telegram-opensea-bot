@@ -22,3 +22,12 @@ create table
     constraint nfts_pkey primary key (nft_id),
     constraint nfts_user_id_fkey foreign key (user_id) references users (user_id)
   ) tablespace pg_default;
+
+-------------------------ADDRESSES------------------------------------
+
+0x51bb4c8bb4901d6aa061282cd7ed916eec715a29 - ETH
+0x8a90cab2b38dba80c64b7734e58ee1db38b8992e - ETH
+0x6ecfac3f581faf25086c95f30077e840681dde2a - MATIC
+0x58318bceaa0d249b62fad57d134da7475e551b47 - ARB
+
+
