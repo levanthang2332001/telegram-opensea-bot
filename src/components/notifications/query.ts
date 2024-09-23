@@ -6,7 +6,7 @@ const fetchUserNotifications = async <T>(userId: number): Promise<T | null> => {
         .from('nfts')
         .select('*')
         .eq('user_id', userId)
-        .eq('is_alert', true);
+        .eq('is_alert', true)
     
     if (error) {
         console.error('Error fetching notifications:', error);

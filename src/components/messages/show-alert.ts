@@ -20,7 +20,9 @@ const showAlertNft = (ctx: Context, alert: any) => {
 }
 
 const disableAlertNft = (ctx: Context) =>  {
-    disableNFTAlert(ctx, { collection_name: disableAlertName })
+    disableNFTAlert(ctx, { collection_name: disableAlertName }).then(() => {
+        ctx.reply('Alert disabled')
+    })
 }
 
 export { showAlertNft, disableAlertNft};     

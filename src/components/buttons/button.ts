@@ -19,16 +19,16 @@ const displayInlineKeyboardSelectButton = (ctx: Context) => {
     });
 }
 
-export type INofitication = {
+export type INotification = {
     text: string;
     callback_data: string;
 }
 
-const displayInlineKeyboard = <T extends string[][] | INofitication[]>(ctx: Context, message: string, buttons: T) => {
+const displayInlineKeyboard = <T extends string[][] | INotification[]>(ctx: Context, message: string, buttons: T) => {
     const keyboard = Array.isArray(buttons)
         ? buttons.map(row => 
             Array.isArray(row)
-                ? row.map((btn: string) => Markup.button.callback(`${btn}`, btn.toLowerCase()))
+                ? row.map((btn: string) => Markup.button.callback(`${btn}`, `network/${btn.toLowerCase()}`))
                 : [Markup.button.callback(`${row.text}`, row.callback_data)]
           )
         : Object.entries(buttons).map(([key, value]) => 

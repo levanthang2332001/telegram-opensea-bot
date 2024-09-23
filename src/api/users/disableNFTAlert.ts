@@ -12,7 +12,8 @@ const disableNFTAlert = async (ctx: Context, alert: { collection_name: string })
         .from('nfts')
         .update({ is_alert: false })
         .eq('collection_name', collection_name)
-        .eq('user_id', userId);
+        .eq('user_id', userId)
+        .select()
 
     if (data.error) {
         console.log(data.error);
