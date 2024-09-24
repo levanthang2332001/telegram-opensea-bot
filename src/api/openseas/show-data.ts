@@ -53,14 +53,16 @@ const getDataContract = async (address: string, chain: string): Promise<NFTType 
         const { value, currency } = data.listings[0].price.current;
         const priceNFT = convertToEth(Number(value)).toFixed(6)
 
-        return {
+        const nftData = {
             address: collection.address,
             chain: collection.chain,
             collection: collection.collection,
             name: collection.name,
             price: priceNFT,
             currency,
-        };
+        }
+
+        return nftData
     } catch (error) {
         console.error('Error in getDataContract:', error);
         return `There was an error: ${error instanceof Error ? error.message : String(error)}`;

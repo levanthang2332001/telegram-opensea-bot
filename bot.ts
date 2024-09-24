@@ -1,6 +1,6 @@
-import dotenv from "dotenv";
+import dotenv, { config } from "dotenv";
 import { CallbackQuery } from "node-telegram-bot-api";
-import { Telegraf } from "telegraf";
+import { Context, Telegraf } from "telegraf";
 import { chatStates, NFTAlertWithPrice } from "./src/interface";
 import { chain, Chain } from "./src/commands/index";
 
@@ -28,7 +28,8 @@ import {
     disableAlertNft,
     showAlertNft,
 } from "./src/components/messages/show-alert";
-import { isCheckStatusAlert } from "./src/api/users/fetchLatesPrice";
+
+import { updateAllNFTPricesAndCheckAlerts } from "./src/components/alerts";
 
 dotenv.config();
 
@@ -56,6 +57,7 @@ bot.telegram.setMyCommands([
 ]);
 
 bot.start(async (ctx) => {
+    ctx.telegram.sendMessage(ctx.from.id, "Hello")
     displayInlineKeyboardSelectButton(ctx);
 
     const { username, id, first_name } = ctx.message.from;
@@ -149,9 +151,7 @@ bot.on("callback_query", async (ctx) => {
                 userId,
                 data
             );
-            if (!alertNFT) return;
-            // chatStates[userId].nftData = alertNFT;
-            // console.log(chatStates[userId].nftData);
+            if (!alertNFT) return;      
             showAlertNft(ctx, alertNFT);
             break;
     }
@@ -171,10 +171,9 @@ bot.on("message", async (ctx) => {
     }
 });
 
-bot.launch().then(() => {
-    console.log("Bot launched");
-});
+bot.launch().then(() => console.log("bot launch"));
 
 process.on("SIGTERM", () => {
     bot.stop();
 });
+
