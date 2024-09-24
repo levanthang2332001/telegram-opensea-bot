@@ -16,4 +16,22 @@ const fetchLatestPrice = async (address: string) : Promise<number | null>  => {
     return data ? data.targetprice : null; 
 }
 
-export { fetchLatestPrice }
+const isCheckStatusAlert = async (address: string) : Promise<boolean> => {
+    const { data, error } = await supabase
+        .from('nfts')
+        .select('*')
+        .eq('address', address)
+        .limit(1)
+        .single();
+        
+    if (error) {
+        console.error("Error fetching latest price:", error);
+        return false; 
+    }
+
+    return data ? true : false; 
+}
+
+
+
+export { fetchLatestPrice, isCheckStatusAlert }

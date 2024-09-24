@@ -59,6 +59,7 @@ interface CollectionData {
 interface ChatState {
     waitingForAddress?: boolean;
     waitingForAlert?: boolean;
+    nftData?: NFTAlertWithPrice;
 }
 
 
@@ -99,3 +100,10 @@ export type {
     NFTAlert,
     NFTAlertWithPrice
 };
+
+export const chatStates: Record<number, ChatState> = {};
+
+export const nftStates: { [userId: number]: {
+    nftData?: NFTAlertWithPrice;
+} } = {};
+

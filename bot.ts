@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import { CallbackQuery } from "node-telegram-bot-api";
 import { Telegraf } from "telegraf";
-import { ChatState, NFTAlertWithPrice, User } from "./src/interface";
+import { chatStates, NFTAlertWithPrice } from "./src/interface";
 import { chain, Chain } from "./src/commands/index";
 
 import {
@@ -28,6 +28,7 @@ import {
     disableAlertNft,
     showAlertNft,
 } from "./src/components/messages/show-alert";
+import { isCheckStatusAlert } from "./src/api/users/fetchLatesPrice";
 
 dotenv.config();
 
@@ -35,8 +36,6 @@ if (!process.env.TELEGRAM_BOT_TOKEN) {
     console.log("Error: Telegram bot token is not provided.");
     process.exit(1);
 }
-
-export const chatStates: Record<number, ChatState> = {};
 
 // Create a bot that uses 'polling' to fetch new updates
 const TOKEN: string = process.env.TELEGRAM_BOT_TOKEN || "";
@@ -151,6 +150,8 @@ bot.on("callback_query", async (ctx) => {
                 data
             );
             if (!alertNFT) return;
+            // chatStates[userId].nftData = alertNFT;
+            // console.log(chatStates[userId].nftData);
             showAlertNft(ctx, alertNFT);
             break;
     }
@@ -165,6 +166,7 @@ bot.on("message", async (ctx) => {
     }
 
     if (state?.waitingForAlert) {
+        // const isAlert = await isCheckStatusAlert();
         receivedMessageAlert(ctx, state);
     }
 });
