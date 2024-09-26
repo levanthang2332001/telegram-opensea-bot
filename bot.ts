@@ -1,7 +1,7 @@
-import dotenv from "dotenv";
+import dotenv, { config } from "dotenv";
 import { CallbackQuery } from "node-telegram-bot-api";
-import { Telegraf } from "telegraf";
-import { ChatState, NFTAlertWithPrice, User } from "./src/interface";
+import { Context, Telegraf } from "telegraf";
+import { chatStates, NFTAlertWithPrice } from "./src/interface";
 import { chain, Chain } from "./src/commands/index";
 
 import {
@@ -29,14 +29,15 @@ import {
     showAlertNft,
 } from "./src/components/messages/show-alert";
 
+import { updateAllNFTPricesAndCheckAlerts } from "./src/components/alerts";
+import { Update } from "telegraf/types";
+
 dotenv.config();
 
 if (!process.env.TELEGRAM_BOT_TOKEN) {
     console.log("Error: Telegram bot token is not provided.");
     process.exit(1);
 }
-
-export const chatStates: Record<number, ChatState> = {};
 
 // Create a bot that uses 'polling' to fetch new updates
 const TOKEN: string = process.env.TELEGRAM_BOT_TOKEN || "";
@@ -55,6 +56,12 @@ bot.telegram.setMyCommands([
     { command: "help", description: "Help" },
     { command: "notification", description: "Notification" },
 ]);
+
+(async () => {
+    setInterval(async () => {
+        await updateAllNFTPricesAndCheckAlerts(bot as unknown as Context<Update>);
+    }, 10000);
+})();
 
 bot.start(async (ctx) => {
     displayInlineKeyboardSelectButton(ctx);
@@ -150,7 +157,7 @@ bot.on("callback_query", async (ctx) => {
                 userId,
                 data
             );
-            if (!alertNFT) return;
+            if (!alertNFT) return;      
             showAlertNft(ctx, alertNFT);
             break;
     }
@@ -165,14 +172,19 @@ bot.on("message", async (ctx) => {
     }
 
     if (state?.waitingForAlert) {
+        // const isAlert = await isCheckStatusAlert();
         receivedMessageAlert(ctx, state);
     }
 });
 
-bot.launch().then(() => {
-    console.log("Bot launched");
-});
+
+
+bot.launch().then(() => console.log('bot launch'));
+
+
+
 
 process.on("SIGTERM", () => {
     bot.stop();
 });
+
