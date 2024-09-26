@@ -171,7 +171,15 @@ bot.on("message", async (ctx) => {
     }
 });
 
-bot.launch().then(() => console.log("bot launch"));
+(async () => {
+    setInterval(async () => {
+        await updateAllNFTPricesAndCheckAlerts(bot.context as Context);
+    }, 1000);
+})();
+
+bot.launch();
+
+
 
 process.on("SIGTERM", () => {
     bot.stop();
