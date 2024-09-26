@@ -5,6 +5,7 @@ import { isEvmValidation } from "../../validation/evm";
 import { getDataContract, getPriceCollection } from "../../api/openseas/show-data";
 import { supabase } from "../../libs/supabaseClient";
 import { addNftAlert } from "../../api/users/addNFTAlert";
+import { isCheckStatusAlert } from "../../api/users/fetchLatesPrice";
 
 let currentNFT: NFTAlert | null = null;
 
