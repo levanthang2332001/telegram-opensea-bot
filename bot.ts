@@ -30,6 +30,7 @@ import {
 } from "./src/components/messages/show-alert";
 
 import { updateAllNFTPricesAndCheckAlerts } from "./src/components/alerts";
+import { Update } from "telegraf/types";
 
 dotenv.config();
 
@@ -56,8 +57,13 @@ bot.telegram.setMyCommands([
     { command: "notification", description: "Notification" },
 ]);
 
+(async () => {
+    setInterval(async () => {
+        await updateAllNFTPricesAndCheckAlerts(bot as unknown as Context<Update>);
+    }, 10000);
+})();
+
 bot.start(async (ctx) => {
-    ctx.telegram.sendMessage(ctx.from.id, "Hello")
     displayInlineKeyboardSelectButton(ctx);
 
     const { username, id, first_name } = ctx.message.from;
@@ -171,13 +177,10 @@ bot.on("message", async (ctx) => {
     }
 });
 
-(async () => {
-    setInterval(async () => {
-        await updateAllNFTPricesAndCheckAlerts(bot.context as Context);
-    }, 1000);
-})();
 
-bot.launch();
+
+bot.launch().then(() => console.log('bot launch'));
+
 
 
 
