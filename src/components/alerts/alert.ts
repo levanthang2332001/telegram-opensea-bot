@@ -25,7 +25,7 @@ const checkAndNotifyUser = async (ctx: Context, nftData: NFTType) => {
             }
         }
     } catch (error) {
-        console.error('Error in checkAndNotifyUser:', error);
+        throw new Error(`Error in checkAndNotifyUser:', ${error}`)
     }
 }
 
@@ -38,7 +38,7 @@ const sendAlertToUser = async (ctx: Context, alert: any, nftData: NFTType) => {
 
     const inlineKeyboard = Markup.inlineKeyboard([
         Markup.button.url('View on OpenSea', `https://opensea.io/collection/${nftData.collection}`),
-        Markup.button.callback('Disable Alert', `disable_alert_${alert.id}`)
+        Markup.button.callback('Disable Alert', `disable_alert${alert.collection_name}`)
     ]);
 
     try {
@@ -48,7 +48,7 @@ const sendAlertToUser = async (ctx: Context, alert: any, nftData: NFTType) => {
         });
         console.log(`Alert sent to user ${alert.user_id} for NFT ${nftData.name}`);
     } catch (error) {
-        console.error(`Failed to send alert to user ${alert.user_id}:`, error);
+        throw new Error(`Failed to send alert to user ${alert.user_id}:`)
     }
 }
 
@@ -72,7 +72,7 @@ const updateAllNFTPricesAndCheckAlerts = async (ctx: Context) => {
 
         console.log('All NFT prices updated and alerts checked');
     } catch (error) {
-        console.error('Error updating all NFT prices and checking alerts:', error);
+        throw new Error(`Error updating all NFT prices and checking alerts:', ${error}`)
     }
 }
 export { updateAllNFTPricesAndCheckAlerts }

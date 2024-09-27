@@ -9,8 +9,7 @@ const fetchUserNotifications = async <T>(userId: number): Promise<T | null> => {
         .eq('is_alert', true)
     
     if (error) {
-        console.error('Error fetching notifications:', error);
-        return null;
+        throw new Error(`Error fetching notifications: ${error.message}`);
     }
     return data as T;
 }
@@ -24,8 +23,7 @@ const fetchNftWithName = async <T>(userId: number, callback_data: string): Promi
         .eq('collection_name', callback_data);
        
     if (error) {
-        console.error('Error fetching notifications:', error);
-        return null;
+        throw new Error(`Error fetching notifications: ${error.message}`);
     }
 
     return data as T;
