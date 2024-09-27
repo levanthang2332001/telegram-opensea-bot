@@ -12,8 +12,7 @@ const notification = async (ctx: Context, message: string, options?: {
         console.log(`Notification sent successfully: ${sentMessage.message_id}`);
         return sentMessage;
     } catch (error) {
-        console.error(`Error sending notification: ${error}`);
-        throw error;
+        throw new Error(`Error sending notification: ${error}`)
     }
 }
 

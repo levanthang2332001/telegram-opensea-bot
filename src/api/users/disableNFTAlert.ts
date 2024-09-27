@@ -8,15 +8,15 @@ const disableNFTAlert = async (ctx: Context, alert: { collection_name: string })
 
     if (!userId) return;
 
-    const data = await supabase
+    const { data , error} = await supabase
         .from('nfts')
         .update({ is_alert: false })
         .eq('collection_name', collection_name)
         .eq('user_id', userId)
         .select()
 
-    if (data.error) {
-        console.log(data.error);
+    if (error) {
+        throw new Error(`Error disabling NFT alert: ${error.message}`)
     }
 
     return data;

@@ -9,8 +9,7 @@ const fetchLatestPrice = async (address: string) : Promise<number | null>  => {
         .single();
 
     if (error) {
-        console.error("Error fetching latest price:", error);
-        return null; 
+        throw new Error(`Error fetching latest price: ${error.message}`);
     }
 
     return data ? data.targetprice : null; 
@@ -25,8 +24,7 @@ const isCheckStatusAlert = async (address: string) : Promise<boolean> => {
         .single();
         
     if (error) {
-        console.error("Error fetching latest price:", error);
-        return false; 
+        throw new Error(`Error fetching latest price: ${error.message}`);
     }
 
     return data ? true : false; 
