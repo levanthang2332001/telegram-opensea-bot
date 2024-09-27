@@ -38,8 +38,7 @@ const addUser = async( user: User) => {
         }
         console.log("data inserted")
     } catch ( error ) {
-        console.error("Error adding NFT alert:", error);
-        throw error;
+        throw new Error(`Error adding NFT alert:, ${error}`)
     }
 }
 

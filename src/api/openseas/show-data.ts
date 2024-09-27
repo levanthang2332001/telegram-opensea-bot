@@ -26,8 +26,7 @@ const getPriceCollection = async (nft: string, chain: string): Promise<string> =
         
         return `${priceInEth} ${currency}`;
     } catch (error) {
-        console.error('Error in getPriceCollection:', error);
-        return `Error: ${error instanceof Error ? error.message : String(error)}`;
+        throw new Error(`Error in getPriceCollection:, ${error}`)
     }
 }
 
@@ -64,8 +63,7 @@ const getDataContract = async (address: string, chain: string): Promise<NFTType 
 
         return nftData
     } catch (error) {
-        console.error('Error in getDataContract:', error);
-        return `There was an error: ${error instanceof Error ? error.message : String(error)}`;
+        throw new Error(`Error in getDataContract:, ${error}`)
     }
 }
 

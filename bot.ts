@@ -35,8 +35,7 @@ import { Update } from "telegraf/types";
 dotenv.config();
 
 if (!process.env.TELEGRAM_BOT_TOKEN) {
-    console.log("Error: Telegram bot token is not provided.");
-    process.exit(1);
+    throw new Error("Error: Telegram bot token is not provided.")
 }
 
 // Create a bot that uses 'polling' to fetch new updates
@@ -91,7 +90,7 @@ bot.action("network", (ctx, next) => {
             displayInlineKeyboard(ctx, messageOfNetwork, networks);
         })
         .catch((err) => {
-            console.error("Error deleting message:", err);
+            throw new Error(`Error deleting message:, ${err}`)
         });
 
     return;
@@ -100,8 +99,7 @@ bot.action("network", (ctx, next) => {
 bot.action("notification", async (ctx) => {
     const id = ctx.from?.id;
     if (!id) {
-        console.error("User ID not found in notification action");
-        return;
+        throw new Error("User ID not found in notification action")
     }
 
     try {
@@ -114,7 +112,7 @@ bot.action("notification", async (ctx) => {
         const groupedData = groupedNotifications(dataOfNFT).flat();
         displayInlineKeyboard(ctx, messageOfNotification, groupedData);
     } catch (error) {
-        console.error("Error in notification action:", error);
+        throw new Error(`Error in notification action:, ${error}`)
     }
 });
 
@@ -124,7 +122,7 @@ bot.action(/^network\/(\w+)$/, (ctx) => {
         selectedChain = chain as Chain;
         displayButtonClickContract(ctx, selectedChain);
     } catch (error) {
-        console.error("Error in network action:", error);
+        throw new Error(`Error in network action:, ${error}`)
     }
 });
 

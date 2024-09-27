@@ -3,8 +3,7 @@ import  { ResponseData, CollectionData } from '../../interface/index';
 dotenv.config();
 
 if(!process.env.OPENSEA_API_KEY) {
-    console.log('Error: Opensea API)KEY is not provided.');
-    process.exit(1);
+    throw new Error('Error: Opensea API)KEY is not provided.')
 }
 
 const options = {
@@ -35,7 +34,6 @@ async function fetchData<T>(url: string, errorMessage: string): Promise<T> {
         }
         return await response.json() as T;
     } catch (err) {
-        console.error(err);
         throw new Error(errorMessage);
     }
 }
