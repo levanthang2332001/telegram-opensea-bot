@@ -31,11 +31,12 @@ import {
 
 import { updateAllNFTPricesAndCheckAlerts } from "./src/components/alerts";
 import { Update } from "telegraf/types";
+import { disableNFTAlert } from "./src/api/users/disableNFTAlert";
 
 dotenv.config();
 
 if (!process.env.TELEGRAM_BOT_TOKEN) {
-    throw new Error("Error: Telegram bot token is not provided.")
+    throw new Error("Error: Telegram bot token is not provided.");
 }
 
 // Create a bot that uses 'polling' to fetch new updates
@@ -56,9 +57,12 @@ bot.telegram.setMyCommands([
     { command: "notification", description: "Notification" },
 ]);
 
+// Update all NFT prices and check alerts every 10 seconds
 (async () => {
     setInterval(async () => {
-        await updateAllNFTPricesAndCheckAlerts(bot as unknown as Context<Update>);
+        await updateAllNFTPricesAndCheckAlerts(
+            bot as unknown as Context<Update>
+        );
     }, 10000);
 })();
 
@@ -73,7 +77,7 @@ bot.start(async (ctx) => {
     await addUser({
         user_id: Number(id),
         username,
-        name: first_name
+        name: first_name,
     });
 });
 
@@ -90,16 +94,16 @@ bot.action("network", (ctx, next) => {
             displayInlineKeyboard(ctx, messageOfNetwork, networks);
         })
         .catch((err) => {
-            throw new Error(`Error deleting message:, ${err}`)
+            throw new Error(`Error deleting message:, ${err}`);
         });
 
     return;
-}); 
+});
 
 bot.action("notification", async (ctx) => {
     const id = ctx.from?.id;
     if (!id) {
-        throw new Error("User ID not found in notification action")
+        throw new Error("User ID not found in notification action");
     }
 
     try {
@@ -112,7 +116,7 @@ bot.action("notification", async (ctx) => {
         const groupedData = groupedNotifications(dataOfNFT).flat();
         displayInlineKeyboard(ctx, messageOfNotification, groupedData);
     } catch (error) {
-        throw new Error(`Error in notification action:, ${error}`)
+        throw new Error(`Error in notification action:, ${error}`);
     }
 });
 
@@ -122,7 +126,16 @@ bot.action(/^network\/(\w+)$/, (ctx) => {
         selectedChain = chain as Chain;
         displayButtonClickContract(ctx, selectedChain);
     } catch (error) {
-        throw new Error(`Error in network action:, ${error}`)
+        throw new Error(`Error in network action:, ${error}`);
+    }
+});
+
+bot.action(/^disable_alert\/(.+)$/, (ctx) => {
+    if (ctx.match && ctx.match[1]) {
+        const data = ctx.match[1];
+        disableNFTAlert(ctx, { collection_name: data });
+    } else {
+        throw new Error("No match found for disable_alert action");
     }
 });
 
@@ -155,7 +168,7 @@ bot.on("callback_query", async (ctx) => {
                 userId,
                 data
             );
-            if (!alertNFT) return;      
+            if (!alertNFT) return;
             showAlertNft(ctx, alertNFT);
             break;
     }
@@ -175,14 +188,8 @@ bot.on("message", async (ctx) => {
     }
 });
 
-
-
-bot.launch().then(() => console.log('bot launch'));
-
-
-
+bot.launch().then(() => console.log("bot launch"));
 
 process.on("SIGTERM", () => {
     bot.stop();
 });
-
