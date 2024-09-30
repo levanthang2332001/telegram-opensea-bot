@@ -1,7 +1,4 @@
 import { Context, Markup } from "telegraf";
-import { NFTAlertWithPrice } from "../../interface";
-import { message } from "telegraf/filters";
-
 
 const displayInlineKeyboardSelectButton = (ctx: Context) => {
     const username = ctx.from?.username;

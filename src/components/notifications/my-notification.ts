@@ -1,8 +1,6 @@
-import { Context, Markup } from "telegraf";
-import { supabase } from "../../libs/supabaseClient"
+import { Context } from "telegraf";
 import { notification } from "./notification";
 import { NFTAlertWithPrice } from "../../interface";
-import { displayInlineKeyboard } from "../buttons";
 import { fetchUserNotifications } from "./query";
 
 
