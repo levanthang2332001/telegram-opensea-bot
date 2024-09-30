@@ -13,10 +13,8 @@ const checkAndNotifyUser = async (ctx: Context, nftData: NFTType) => {
             .eq('is_alert', true)
 
         if( error ) throw error;
-
         
         for(const alert of alerts) {
-            // console.log("alert", alert)
             const currentPrice = parseFloat(nftData.price);
             const targetPrice = parseFloat(String(alert.targetprice));
 
@@ -30,15 +28,17 @@ const checkAndNotifyUser = async (ctx: Context, nftData: NFTType) => {
 }
 
 const sendAlertToUser = async (ctx: Context, alert: any, nftData: NFTType) => {
+    console.log('sendAlertToUser', alert)
     const message = [
-        `🚨 ALERT FOR <b>${nftData.name?.toUpperCase()}</b>!🚨\n`,
-        `Current Price: <b>${nftData.price} ${nftData.currency}</b>`,
-        `Target Price: <b>${alert.targetprice} ${nftData.currency}</b>`,
+        `🚨 ALERT FOR <b>${nftData.name?.toUpperCase()}</b>!🚨`,
+        `-------------------------------------`,
+        `Current Price: <code>${nftData.price} ${nftData.currency}</code>`,
+        `Target Price : <code>${alert.targetprice} ${nftData.currency}</code>`,
     ].join('\n');
 
     const inlineKeyboard = Markup.inlineKeyboard([
         Markup.button.url('View on OpenSea', `https://opensea.io/collection/${nftData.collection}`),
-        Markup.button.callback('Disable Alert', `disable_alert${alert.collection_name}`)
+        Markup.button.callback('Disable Alert', `disable_alert/${alert.collection_name.toLowerCase()}`)
     ]);
 
     try {
