@@ -1,8 +1,8 @@
-import dotenv, { config } from "dotenv";
+import dotenv from "dotenv";
 import { CallbackQuery } from "node-telegram-bot-api";
 import { Context, Telegraf } from "telegraf";
 import { chatStates, NFTAlertWithPrice } from "./src/interface";
-import { chain, Chain } from "./src/commands/index";
+import { Chain } from "./src/commands/index";
 
 import {
     receivedMessageAlert,
@@ -54,7 +54,6 @@ let deletedMessageId: number = 0;
 bot.telegram.setMyCommands([
     { command: "start", description: "Start the bot" },
     { command: "help", description: "Help" },
-    { command: "notification", description: "Notification" },
 ]);
 
 // Update all NFT prices and check alerts every 10 seconds
@@ -63,7 +62,7 @@ bot.telegram.setMyCommands([
         await updateAllNFTPricesAndCheckAlerts(
             bot as unknown as Context<Update>
         );
-    }, 10000);
+    }, 5 * 60 * 1000); // 5 minutes in milliseconds
 })();
 
 bot.start(async (ctx) => {

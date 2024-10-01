@@ -1,7 +1,5 @@
 import { Context, Format, Markup } from "telegraf";
-import { NFTAlertWithPrice } from "../../interface";
 import { disableNFTAlert } from "../../api/users/disableNFTAlert";
-
 
 const messageAlert = (alert: any) => `${Format.italic(alert[0].chain.toUpperCase()).text} 
 ${alert[0].name} | Alert : <code>${alert[0].targetprice} ${alert[0].currency}</code>`

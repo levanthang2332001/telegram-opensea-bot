@@ -1,16 +1,14 @@
-import {  Message } from "node-telegram-bot-api";
+import { Message } from "node-telegram-bot-api";
 import { Context, Markup } from "telegraf";
 import { ChatState, NFTAlert, NFTType } from "../../interface";
 import { isEvmValidation } from "../../validation/evm";
-import { getDataContract, getPriceCollection } from "../../api/openseas/show-data";
-import { supabase } from "../../libs/supabaseClient";
+import { getDataContract } from "../../api/openseas/show-data";
 import { addNftAlert } from "../../api/users/addNFTAlert";
-import { isCheckStatusAlert } from "../../api/users/fetchLatesPrice";
 
 let currentNFT: NFTAlert | null = null;
 
 const showDataNFT = (nft: NFTType) => `*${nft.chain?.toUpperCase()}*
-NFT: [${nft.name}](https://pro.opensea.io/collection/${nft.collection})\n
+NFT : [${nft.name}](https://pro.opensea.io/collection/${nft.collection})\n
 _Floor Price: ${nft.price.replace(/\./g, '\\.')} ${nft.currency}_`;
 
 const receivedMessageContract = async (ctx: Context, state: ChatState, chain: string) => {

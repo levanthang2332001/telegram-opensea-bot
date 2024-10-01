@@ -1,5 +1,5 @@
 import { GetBestListingsByCollection, GetCollectionFromAddress } from "./opensea";
-import { ChatState, CollectionData, NFTType } from "../../interface";
+import { ChatState, NFTType } from "../../interface";
 
 const convertToEth = (price: number) => {
     return price / Math.pow(10, 18);
