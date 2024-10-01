@@ -53,7 +53,6 @@ const sendAlertToUser = async (ctx: Context, alert: any, nftData: NFTType) => {
 }
 
 const updateAllNFTPricesAndCheckAlerts = async (ctx: Context) => {
-
     try {
         const { data: nftData, error } = await supabase
             .from('nfts')

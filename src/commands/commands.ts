@@ -18,7 +18,7 @@ const InlineKeyboardButtonChains: InlineKeyboardButton[][] = [
 
 const InlineKeyboardButtonChoose: InlineKeyboardButton[][] = [
     [{text: 'Select a network', callback_data: '/selectChain'}],
-    [{text: 'My notification', callback_data: '/notifications'}]
+    [{text: 'My notification', callback_data: '/notification'}]
 ]
 
 const selectButtons = [
@@ -28,7 +28,7 @@ const selectButtons = [
     },
     {
         text: 'My notification',
-        callback_data: '/notifications',
+        callback_data: '/notification',
     },
 ]
 

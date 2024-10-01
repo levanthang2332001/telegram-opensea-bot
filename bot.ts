@@ -14,15 +14,8 @@ import {
     displayInlineKeyboard,
 } from "./src/components/buttons/index";
 import { addUser } from "./src/api/users/addUser";
-import {
-    groupedNotifications,
-    myNotification,
-} from "./src/components/notifications";
-import {
-    messageOfNetwork,
-    messageOfNotification,
-    networks,
-} from "./src/types/message";
+import { handleNotificationCommand } from "./src/components/notifications";
+import { messageOfNetwork, networks } from "./src/types/message";
 import { fetchNftWithName } from "./src/components/notifications/query";
 import {
     disableAlertNft,
@@ -54,6 +47,7 @@ let deletedMessageId: number = 0;
 bot.telegram.setMyCommands([
     { command: "start", description: "Start the bot" },
     { command: "help", description: "Help" },
+    { command: "notification", description: "My notification" },
 ]);
 
 // Update all NFT prices and check alerts every 10 seconds
@@ -99,24 +93,8 @@ bot.action("network", (ctx, next) => {
     return;
 });
 
-bot.action("notification", async (ctx) => {
-    const id = ctx.from?.id;
-    if (!id) {
-        throw new Error("User ID not found in notification action");
-    }
-
-    try {
-        // Fetch the user's notifications
-        const dataOfNFT = await myNotification(ctx, id);
-
-        if (!dataOfNFT || dataOfNFT.length === 0) return;
-
-        // Group the notifications and display them
-        const groupedData = groupedNotifications(dataOfNFT).flat();
-        displayInlineKeyboard(ctx, messageOfNotification, groupedData);
-    } catch (error) {
-        throw new Error(`Error in notification action:, ${error}`);
-    }
+bot.command("notification", async (ctx) => {
+    await handleNotificationCommand(ctx);
 });
 
 bot.action(/^network\/(\w+)$/, (ctx) => {
@@ -132,7 +110,13 @@ bot.action(/^network\/(\w+)$/, (ctx) => {
 bot.action(/^disable_alert\/(.+)$/, (ctx) => {
     if (ctx.match && ctx.match[1]) {
         const data = ctx.match[1];
-        disableNFTAlert(ctx, { collection_name: data });
+        console.log(data)
+
+        const alert = disableNFTAlert(ctx, { collection_name: data });
+
+        if (alert !== undefined) {
+            ctx.reply("Your alert has been disabled 👍, click /notification to see your alert");
+        }
     } else {
         throw new Error("No match found for disable_alert action");
     }
@@ -161,6 +145,9 @@ bot.on("callback_query", async (ctx) => {
             break;
         case "delete":
             ctx.reply("Your alert has been set");
+            break;
+        case "notification":
+            handleNotificationCommand(ctx);
             break;
         default:
             const alertNFT = await fetchNftWithName<NFTAlertWithPrice>(
