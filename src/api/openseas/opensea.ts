@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import  { ResponseData, CollectionData } from '../../interface/index';
+import { ResponseData, CollectionData } from '../../interface/index';
 dotenv.config();
 
 if(!process.env.OPENSEA_API_KEY) {
