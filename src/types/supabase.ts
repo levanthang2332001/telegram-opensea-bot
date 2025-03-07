@@ -37,36 +37,48 @@ export type Database = {
       nfts: {
         Row: {
           address: string
+          alert_triggered: boolean | null
           chain: string
           collection_name: string
+          created_at: string
           currency: string
           is_alert: boolean | null
-          name: string | null
+          last_checked_at: string | null
+          last_checked_price: number | null
           nft_id: number
-          targetprice: number | null
-          user_id: number
+          target_price: number | null
+          updated_at: string
+          user_id: string
         }
         Insert: {
           address: string
+          alert_triggered?: boolean | null
           chain: string
           collection_name: string
+          created_at?: string
           currency: string
           is_alert?: boolean | null
-          name?: string | null
+          last_checked_at?: string | null
+          last_checked_price?: number | null
           nft_id?: number
-          targetprice?: number | null
-          user_id: number
+          target_price?: number | null
+          updated_at?: string
+          user_id: string
         }
         Update: {
           address?: string
+          alert_triggered?: boolean | null
           chain?: string
           collection_name?: string
+          created_at?: string
           currency?: string
           is_alert?: boolean | null
-          name?: string | null
+          last_checked_at?: string | null
+          last_checked_price?: number | null
           nft_id?: number
-          targetprice?: number | null
-          user_id?: number
+          target_price?: number | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: [
           {
@@ -80,18 +92,27 @@ export type Database = {
       }
       users: {
         Row: {
+          created_at: string
+          is_active: boolean | null
           name: string
-          user_id: number
+          updated_at: string
+          user_id: string
           username: string
         }
         Insert: {
+          created_at?: string
+          is_active?: boolean | null
           name: string
-          user_id: number
+          updated_at?: string
+          user_id: string
           username: string
         }
         Update: {
+          created_at?: string
+          is_active?: boolean | null
           name?: string
-          user_id?: number
+          updated_at?: string
+          user_id?: string
           username?: string
         }
         Relationships: []
@@ -192,4 +213,19 @@ export type Enums<
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
     ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof PublicSchema["CompositeTypes"]
+    | { schema: keyof Database },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
+    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never

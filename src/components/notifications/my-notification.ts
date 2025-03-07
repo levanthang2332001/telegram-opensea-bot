@@ -21,8 +21,8 @@ const myNotification = async (
 
 /* Convert data to [[]] */
 const groupedNotifications = (notifications: NFTAlertWithPrice[]) => {
-    return notifications.map(({ name, collection_name }) => ({
-        text: name,
+    return notifications.map(({ collection_name }) => ({
+        text: collection_name,
         callback_data: collection_name,
     }));
 };
@@ -41,6 +41,7 @@ const handleNotificationCommand = async (ctx: Context) => {
 
         // Group the notifications and display them
         const groupedData = groupedNotifications(dataOfNFT).flat();
+
         await displayInlineKeyboard(ctx, messageOfNotification, groupedData);
     } catch (error) {
         console.error(`Error in notification action:`, error);

@@ -16,7 +16,7 @@ const checkAndNotifyUser = async (ctx: Context, nftData: NFTType) => {
         
         for(const alert of alerts) {
             const currentPrice = parseFloat(nftData.price);
-            const targetPrice = parseFloat(String(alert.targetprice));
+            const targetPrice = parseFloat(String(alert.target_price));
 
             if(currentPrice >= targetPrice) {
                 await sendAlertToUser(ctx, alert, nftData);
@@ -31,9 +31,9 @@ const sendAlertToUser = async (ctx: Context, alert: any, nftData: NFTType) => {
     console.log('sendAlertToUser', alert)
     const message = [
         `🚨 ALERT FOR <b>${nftData.name?.toUpperCase()}</b>!🚨`,
-        `-------------------------------------`,
+        `-------------------------------------`,    
         `Current Price: <code>${nftData.price} ${nftData.currency}</code>`,
-        `Target Price : <code>${alert.targetprice} ${nftData.currency}</code>`,
+        `Target Price : <code>${alert.target_price} ${nftData.currency}</code>`,
     ].join('\n');
 
     const inlineKeyboard = Markup.inlineKeyboard([

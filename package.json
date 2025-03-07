@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@types/mongoose": "^5.11.97",
-    "supabase": "^1.191.3"
+    "supabase": "^2.15.8"
   },
   "nodemonConfig": {
     "watch": [

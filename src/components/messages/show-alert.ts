@@ -2,13 +2,13 @@ import { Context, Format, Markup } from "telegraf";
 import { disableNFTAlert } from "../../api/users/disableNFTAlert";
 
 const messageAlert = (alert: any) => `${Format.italic(alert[0].chain.toUpperCase()).text} 
-${alert[0].name} | Alert : <code>${alert[0].targetprice} ${alert[0].currency}</code>`
+${alert[0].collection_name} | Alert : <code>${alert[0].target_price} ${alert[0].currency}</code>`
 
 let disableAlertName = '';
 
 const showAlertNft = (ctx: Context, alert: any) => {
     if (!alert || alert.length === 0) return;
-    
+    console.log(alert)
     disableAlertName = alert[0]?.collection_name || '';
 
     if (!disableAlertName) {

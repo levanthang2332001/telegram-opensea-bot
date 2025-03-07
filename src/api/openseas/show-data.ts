@@ -38,13 +38,16 @@ const getPriceCollection = async (nft: string, chain: string): Promise<string> =
  * @return {*} 
  */
 const getDataContract = async (address: string, chain: string): Promise<NFTType | string> => {
+    console.log(address, chain)
     try {
         const collection = await GetCollectionFromAddress(address, chain);
         if (!collection) {
             throw new Error('Collection not found');
         }
 
+
         const data = await GetBestListingsByCollection(collection.collection);
+
         if (!data || !data.listings || data.listings.length === 0) {
             throw new Error('No listings found for the collection');
         }

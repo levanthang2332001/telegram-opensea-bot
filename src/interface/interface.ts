@@ -70,10 +70,14 @@ type NFTType = {
 
 /* -------------------------------------------------------------- */
 
-type User = {
-    user_id: number,
-    username: string,
-    name: string
+interface User {
+    user_id: string;
+    username: string;
+    name: string;
+    created_at?: string;
+    updated_at?: string;
+    is_active?: boolean;
+    telegram_chat_id?: number;
 }
 
 type NFTAlert = {

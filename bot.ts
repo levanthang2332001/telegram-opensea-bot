@@ -16,7 +16,7 @@ import {
 import { addUser } from "./src/api/users/addUser";
 import { handleNotificationCommand } from "./src/components/notifications";
 import { messageOfNetwork, networks } from "./src/types/message";
-import { fetchNftWithName } from "./src/components/notifications/query";
+import { fetchNftWithName, fetchUserNotifications } from "./src/components/notifications/query";
 import {
     disableAlertNft,
     showAlertNft,
@@ -50,13 +50,13 @@ bot.telegram.setMyCommands([
     { command: "notification", description: "My notification" },
 ]);
 
-// Update all NFT prices and check alerts every 10 seconds
+// Update all NFT prices and check alerts every 3 minutes
 (async () => {
     setInterval(async () => {
         await updateAllNFTPricesAndCheckAlerts(
             bot as unknown as Context<Update>
         );
-    }, 5 * 60 * 1000); // 5 minutes in milliseconds
+    }, 3 * 60 * 1000); // 3 minutes in milliseconds
 })();
 
 bot.start(async (ctx) => {
@@ -68,7 +68,7 @@ bot.start(async (ctx) => {
 
     // Add the user to the database
     await addUser({
-        user_id: Number(id),
+        user_id: id.toString(),
         username,
         name: first_name,
     });
@@ -150,11 +150,11 @@ bot.on("callback_query", async (ctx) => {
             handleNotificationCommand(ctx);
             break;
         default:
-            const alertNFT = await fetchNftWithName<NFTAlertWithPrice>(
-                userId,
-                data
+            const alertNFT = await fetchUserNotifications<NFTAlertWithPrice>(
+                userId
             );
             if (!alertNFT) return;
+            
             showAlertNft(ctx, alertNFT);
             break;
     }

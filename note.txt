@@ -31,52 +31,20 @@ create table
 0x58318bceaa0d249b62fad57d134da7475e551b47 - ARB
 
 
-// ... existing code ...
-
-// New function to update NFT prices and check against target prices
-async function updateAndCheckNftPrices() {
-    for (const userId in chatStates) {
-        const state = chatStates[userId];
-        if (state?.nftData) { // Assuming nftData holds the relevant NFT information
-            const nftData = state.nftData;
-
-            // Fetch the latest price for the NFT (implement fetchLatestPrice as needed)
-            const latestPrice = await fetchLatestPrice(nftData.contractAddress); // Replace with actual method to get the price
-
-            // Update the price in nftData
-            nftData.price = latestPrice;
-
-            // Check if the latest price matches the target price
-            if (nftData.is_target === latestPrice) {
-                const message = `Alert: The price of ${nftData.name} has reached your target of ${nftData.is_target}!`;
-                await bot.telegram.sendMessage(userId, message);
-            }
-        }
-    }
-}
-
-// Set an interval to update prices and check target prices every 2 minutes
-setInterval(updateAndCheckNftPrices, 2 * 60 * 1000); // 2 minutes in milliseconds
-
-// Update the callback_query handler to store NFT data
-bot.on("callback_query", async (ctx) => {
-    // ... existing code ...
-    
-    switch (data) {
-        // ... existing cases ...
-        default:
-            const alertNFT = await fetchNftWithName<NFTAlertWithPrice>(
-                userId,
-                data
-            );
-            if (!alertNFT) return;
-
-            // Store the NFT data in chatStates for periodic checking
-            chatStates[userId].nftData = alertNFT; // Store the NFT data
-            showAlertNft(ctx, alertNFT);
-            break;
-    }
-    return;
-});
-
-// ... existing code ...
+create table public.nfts (
+  nft_id bigserial not null,
+  collection_name text not null,
+  address text not null,
+  target_price integer null,
+  currency text not null,
+  chain text not null,
+  user_id text not null,
+  is_alert boolean null default false,
+  created_at timestamp with time zone not null default timezone ('utc'::text, now()),
+  updated_at timestamp with time zone not null default timezone ('utc'::text, now()),
+  last_checked_price numeric(20, 8) null,
+  last_checked_at timestamp with time zone null,
+  alert_triggered boolean null default false,
+  constraint nfts_pkey primary key (nft_id),
+  constraint nfts_user_id_fkey foreign KEY (user_id) references users (user_id) on delete CASCADE
+) TABLESPACE pg_default;

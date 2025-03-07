@@ -21,8 +21,8 @@ const receivedMessageContract = async (ctx: Context, state: ChatState, chain: st
 
     if (state?.waitingForAddress) {
         const nft = await getDataContract(contract, chain);
+        console.log("nft", nft)
 
-        console.log("nft", nft);
 
         if (!nft || typeof nft === 'string') {
             ctx.reply('Contract not found');
@@ -58,6 +58,8 @@ const receivedMessageAlert = async (ctx: Context, state: ChatState): Promise<voi
 
     if (!currentNFT) return;
 
+    console.log("currentNFT", currentNFT)
+
     const { address, chain, collection_name, currency } = currentNFT;
 
     if (!collection_name || !address || !chain || !currency) {
@@ -65,7 +67,9 @@ const receivedMessageAlert = async (ctx: Context, state: ChatState): Promise<voi
         return;
     }
 
-    addNftAlert(ctx, currentNFT, message, ctx.from?.id as number);
+    if (ctx.from?.id) {
+        addNftAlert(ctx, currentNFT, message, ctx.from.id.toString());
+    }
     
     state.waitingForAlert = false;
 }
