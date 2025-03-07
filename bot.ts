@@ -1,4 +1,3 @@
-import dotenv from "dotenv";
 import { CallbackQuery } from "node-telegram-bot-api";
 import { Context, Telegraf } from "telegraf";
 import { chatStates, NFTAlertWithPrice } from "./src/interface";
@@ -25,8 +24,6 @@ import {
 import { updateAllNFTPricesAndCheckAlerts } from "./src/components/alerts";
 import { Update } from "telegraf/types";
 import { disableNFTAlert } from "./src/api/users/disableNFTAlert";
-
-dotenv.config();
 
 if (!process.env.TELEGRAM_BOT_TOKEN) {
     throw new Error("Error: Telegram bot token is not provided.");
